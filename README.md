@@ -1,100 +1,173 @@
-# Masters Thesis: Interest Group Analysis
+# Master’s Thesis: Interest Group Analysis Repository
 
 ## Overview
-This repository contains the complete workflow for my master's thesis, **"Beyond Policy Influence: A Deeper Dive into the Factors Driving Advocacy Group Prominence,"** conducted at the University of Amsterdam. The research explores the dynamics of interest group prominence in legislative debates, leveraging advanced statistical methods, supervised learning, and integrated datasets.
+This repository contains the complete workflow for the master's thesis, **"Beyond Policy Influence: A Deeper Dive into the Factors Driving Advocacy Group Prominence,"** conducted at the University of Amsterdam. The study investigates the dynamics of interest group prominence in legislative debates, leveraging advanced statistical methods, supervised learning, and integrated datasets.
 
 Prominence, a key concept in this study, reflects the recognition and soft power afforded to advocacy organizations by policymakers. By analyzing legislative debates from the 114th and 115th U.S. Congress sessions, this study identifies the factors influencing prominence and challenges conventional notions about interest group success.
+
+---
 
 ## Research Questions
 1. Why do some politicians prioritize certain advocacy organizations?
 2. What factors contribute to variations in prominence across groups and issues?
 
+---
+
 ## Skills Demonstrated
-This project demonstrates proficiency in the following technical and analytical skills:
+This project highlights the following technical and analytical skills:
 
 - **Data Collection**:
-  - Web scraping and API usage (e.g., GovInfo API, Wikipedia API).
+  - API usage (e.g., GovInfo API, Congress API, Google Trends).
   - Handling large legislative datasets (~77,000 documents).
 - **Data Processing**:
-  - Data cleaning and preprocessing using Python (`pandas`, `numpy`).
-  - Feature engineering and transformation for machine learning pipelines.
+  - Cleaning, transforming, and organizing data for analysis using Python.
 - **Machine Learning**:
-  - Implementation of supervised learning models (e.g., Support Vector Machines) for text classification.
-  - Hyperparameter tuning and evaluation of models using metrics like accuracy, precision, recall, and F1-score.
+  - Supervised learning for text classification (Support Vector Machines, Naive Bayes, Random Forests).
 - **Statistical Analysis**:
-  - Generalized Linear Mixed-Effects Modeling using R (`lme4`, `broom.mixed`).
-  - Multilevel regression analysis to explore policy, group, and politician-level factors.
+  - Generalized Linear Mixed-Effects Modeling using R.
 - **Data Integration**:
-  - Combining structured and unstructured data into a unified dataset.
-  - Feature extraction from textual data (e.g., legislative mentions).
+  - Combining structured and unstructured data.
 - **Visualization and Reporting**:
-  - Data visualization using Python (`seaborn`, `matplotlib`) and R (`ggplot2`).
-  - Reporting insights in a structured, research-driven format using R Markdown and Python scripts.
+  - Creating visual insights and documenting findings in structured reports.
 - **Project Management**:
-  - Organizing workflows and managing a multi-stage analysis pipeline.
-  - Documenting and structuring the repository for reproducibility.
+  - Multi-stage analysis pipeline management and reproducibility.
+
+---
 
 ## Repository Structure
+
 ```bash
 .
 ├── LICENSE                                # License details for this repository
 ├── README.md                              # High-level overview of the repository
 ├── MasterThesisUniversityOfAmsterdam/     # Main repository directory
-│   ├── 1. Data Collection/                # Scripts and data for collecting raw legislative data
-│   ├── 2. Data Processing/                # Scripts for cleaning and preparing data for analysis
-│   ├── 3. Supervised Learning Classifiers/ # Classifiers for predicting prominence using supervised methods
-│   ├── 4. Integrated Dataset and Analysis/ # Advanced data analysis and modeling pipeline
-│   │   ├── DataProcessingAndRegression.py    # Python script for regression analysis and feature engineering
-│   │   ├── InterestGroupAnalysisPipeline.py  # Comprehensive pipeline for interest group-level analysis
-│   ├── 5. Visualization and Reporting/    # Scripts for visualizing results and generating reports
+│   ├── 1. Data Collection/                # Scripts for collecting legislative, policy, and congress data
+│   ├── 2. Data Processing/                # Scripts for cleaning and preparing collected data
+│   ├── 3. Supervised Learning Classifiers/ # Machine learning pipeline for text classification
+│   ├── 4. Modeling and Analysis/          # Data integration and statistical modeling
+│   ├── 5. Visualization and Reporting/    # Reports, visualizations, and thesis documents
+│   └── results/                           # Outputs including processed data, models, and plots
 ```
+
+---
 
 ## Methodologies
 ### Data Sources
-- **Congressional Record**: Over 77,000 legislative documents analyzed for mentions of interest groups.
-- **Washington Representative Study**: Provides group-level variables (e.g., age, membership status).
-- **Google Trends**: Measures public salience of policy areas.
+- **Congressional Records**: Analyzed over 77,000 legislative documents.
+- **Washington Representative Study**: Group-level variables like membership and lobbying expenditure.
+- **Google Trends**: Public salience measures for policy areas.
 
 ### Analytical Framework
 1. **Supervised Machine Learning**:
-   - A Support Vector Machine classifier identified prominent mentions within congressional debates (~81% accuracy).
+   - Classifies prominent mentions within debates (~81% accuracy with SVM).
 2. **Generalized Linear Mixed-Effects Models**:
-   - Explored how factors at the policy, group, and politician levels influence prominence.
+   - Examines factors influencing prominence at policy, group, and politician levels.
 3. **Data Integration**:
-   - Combined legislative data, interest group characteristics, and public salience metrics.
+   - Combines multiple data sources for robust analysis.
+
+---
+
+## Subfolder Summaries
+
+### **1. Data Collection**
+- **Purpose**: Scripts to gather legislative data, policy metadata, and congressional profiles.
+- **Key Scripts**:
+  - `1.govinfo_data_fetcher.py`: Collects legislative transcripts.
+  - `7.fetch_bill_data.py`: Gathers metadata on bills.
+  - `policy_salience_pipeline.py`: Analyzes public interest using Google Trends.
+- **Outputs**:
+  - Legislative transcripts, bill metadata, and salience metrics.
+
+---
+
+### **2. Data Processing**
+- **Purpose**: Refines, cleans, and structures raw data.
+- **Key Scripts**:
+  - `process_api_results.py`: Processes API responses.
+  - `assign_speakers_to_granules.py`: Links legislative text to speakers.
+  - `policy_area_mapper.py`: Maps committees and topics to policy areas.
+- **Outputs**:
+  - Structured datasets and speaker-text mappings.
+
+---
+
+### **3. Supervised Learning Classifiers**
+- **Purpose**: Builds and evaluates machine learning models for classifying prominence.
+- **Key Script**:
+  - `text_classifier_pipeline.py`: Handles preprocessing, training, evaluation, and labeling of data.
+- **Outputs**:
+  - Classification reports, labeled datasets, and predictions.
+
+---
+
+### **4. Modeling and Analysis**
+- **Purpose**: Analyzes factors influencing prominence through advanced statistical models.
+- **Key Scripts**:
+  - `model_policy_salience.R`: Explores the role of public salience in prominence.
+  - `DataProcessingAndRegression.py`: Prepares data for regression and modeling.
+- **Outputs**:
+  - Regression models, cleaned datasets, and statistical summaries.
+
+---
+
+### **5. Visualization and Reporting**
+- **Purpose**: Visualizes findings and compiles reports for academic and policy audiences.
+- **Key Documents**:
+  - `Technical Report MA Thesis.pdf`: Summarizes methods and findings.
+  - `Thesis_UvA_Kaleb_Mazurek.pdf`: Comprehensive thesis document.
+- **Insights**:
+  - Advocacy prominence is shaped by lobbying, policy engagement, and niche focus.
+  - Seniority in politicians and high-salience issues may not guarantee greater visibility.
+
+---
 
 ## Key Findings
-- Senior politicians are less likely to afford prominence to interest groups.
-- High or medium saliency policy areas do not guarantee greater prominence for advocacy groups.
-- Advocacy organizations engaging across diverse policy areas are more likely to gain prominence.
-- External lobbying expenditure influences prominence only when controlling for other variables.
+- **Policy Salience**:
+  - Medium-salience issues increase prominence, while high-salience areas show mixed effects.
+- **Group Characteristics**:
+  - Lobbying expenditure and broad policy engagement are significant predictors of prominence.
+- **Speaker Attributes**:
+  - Seniority and election-year status exhibit unexpected negative or mixed effects.
 
-## Usage
-### Clone the Repository
-```bash
-git clone https://github.com/username/MastersThesis_InterestGroupAnalysis.git
-```
+---
 
-### Navigate to Folders
-- Each folder contains scripts
+## Prerequisites
+1. **Python**: Install dependencies with:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. **R**: Install required libraries:
+   ```R
+   install.packages(c("lme4", "ggplot2", "broom.mixed"))
+   ```
+3. **API Keys**: Obtain keys for GovInfo, Congress API, and Google Trends.
 
-and data relevant to a specific stage of the analysis.
-- Review the README files within subfolders for script-specific instructions.
+---
 
-### Run Scripts
-- Follow instructions in the subfolder-specific README files to execute scripts.
+## Usage Instructions
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/username/MastersThesis_InterestGroupAnalysis.git
+   ```
+2. Navigate to subfolders and review their README files for script-specific instructions.
+3. Run scripts sequentially for each stage:
+   - Data Collection → Data Processing → Machine Learning → Modeling → Visualization.
 
-## Requirements
-- **R**: Required libraries include `lme4`, `ggplot2`, `dplyr`, `broom.mixed`, etc.
-- **Python**: Required libraries include `pandas`, `numpy`, `scikit-learn`, `statsmodels`, `seaborn`, etc.
+---
 
 ## Contribution
-Contributions are welcome! Feel free to fork the repository and submit pull requests.
+Contributions are welcome! Fork the repository and submit pull requests for improvements.
+
+---
 
 ## Citation
-If using this repository in your research, please cite:
+If using this repository for your research, please cite:
 
 Mazurek, Kaleb. *Beyond Policy Influence: A Deeper Dive into the Factors Driving Advocacy Group Prominence*. University of Amsterdam, 2023.
 
+---
+
 ## License
-This repository is licensed under the MIT License. See LICENSE for details.
+This repository is licensed under the MIT License. See `LICENSE` for details.
+
+--- 
