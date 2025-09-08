@@ -1,0 +1,62 @@
+# Updated Project - Data and Build Files
+updated-project-2024/data/raw/*.csv
+updated-project-2024/data/raw/*.json
+updated-project-2024/data/raw/*.xlsx
+updated-project-2024/results/models/*.pkl
+updated-project-2024/results/models/*.joblib
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Virtual Environments  
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Large datasets (uncomment if needed)
+# *.csv
+# *.json
+# *.parquet
+
+# Temporary files
+tmp/
+temp/

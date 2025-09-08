@@ -1,173 +1,88 @@
-# Master’s Thesis: Interest Group Analysis Repository
+# Master's Thesis Repository: Interest Group Analysis
 
 ## Overview
-This repository contains the complete workflow for the master's thesis, **"Beyond Policy Influence: A Deeper Dive into the Factors Driving Advocacy Group Prominence,"** conducted at the University of Amsterdam. The study investigates the dynamics of interest group prominence in legislative debates, leveraging advanced statistical methods, supervised learning, and integrated datasets.
-
-Prominence, a key concept in this study, reflects the recognition and soft power afforded to advocacy organizations by policymakers. By analyzing legislative debates from the 114th and 115th U.S. Congress sessions, this study identifies the factors influencing prominence and challenges conventional notions about interest group success.
-
----
-
-## Research Questions
-1. Why do some politicians prioritize certain advocacy organizations?
-2. What factors contribute to variations in prominence across groups and issues?
-
----
-
-## Skills Demonstrated
-This project highlights the following technical and analytical skills:
-
-- **Data Collection**:
-  - API usage (e.g., GovInfo API, Congress API, Google Trends).
-  - Handling large legislative datasets (~77,000 documents).
-- **Data Processing**:
-  - Cleaning, transforming, and organizing data for analysis using Python.
-- **Machine Learning**:
-  - Supervised learning for text classification (Support Vector Machines, Naive Bayes, Random Forests).
-- **Statistical Analysis**:
-  - Generalized Linear Mixed-Effects Modeling using R.
-- **Data Integration**:
-  - Combining structured and unstructured data.
-- **Visualization and Reporting**:
-  - Creating visual insights and documenting findings in structured reports.
-- **Project Management**:
-  - Multi-stage analysis pipeline management and reproducibility.
-
----
+This repository contains both the **original** Master's thesis work and **updated** research projects, demonstrating the evolution and improvement of the Interest Group Analysis research conducted at the University of Amsterdam.
 
 ## Repository Structure
 
-```bash
+```
 .
-├── LICENSE                                # License details for this repository
-├── README.md                              # High-level overview of the repository
-├── MasterThesisUniversityOfAmsterdam/     # Main repository directory
-│   ├── 1. Data Collection/                # Scripts for collecting legislative, policy, and congress data
-│   ├── 2. Data Processing/                # Scripts for cleaning and preparing collected data
-│   ├── 3. Supervised Learning Classifiers/ # Machine learning pipeline for text classification
-│   ├── 4. Modeling and Analysis/          # Data integration and statistical modeling
-│   ├── 5. Visualization and Reporting/    # Reports, visualizations, and thesis documents
-│   └── results/                           # Outputs including processed data, models, and plots
+├── LICENSE                           # Repository license
+├── README.md                        # This file - main repository overview
+├── original-thesis-2023/            # 🗄️  ARCHIVED: Original Master's thesis (2023)
+│   ├── README.md                    # Original thesis documentation
+│   ├── MasterThesisUniversityOfAmsterdam/  # Original thesis content
+│   │   ├── 1. Data Collection/
+│   │   ├── 2. Data Processing/
+│   │   ├── 3. Supervised Learning Classifiers/
+│   │   ├── 4. Modeling and Analysis/
+│   │   └── 5. Visualization and Reporting/
+│   └── results/                     # Original results and outputs
+└── updated-project-2024/            # 🚀 NEW: Updated research project
+    ├── README.md                    # Updated project documentation
+    ├── src/                         # Source code for updated analysis
+    ├── data/                        # Updated datasets
+    ├── notebooks/                   # Jupyter notebooks for analysis
+    ├── results/                     # New results and visualizations
+    └── docs/                        # Updated documentation and reports
 ```
 
 ---
 
-## Methodologies
-### Data Sources
-- **Congressional Records**: Analyzed over 77,000 legislative documents.
-- **Washington Representative Study**: Group-level variables like membership and lobbying expenditure.
-- **Google Trends**: Public salience measures for policy areas.
+## 📚 Original Thesis (2023) - ARCHIVED
 
-### Analytical Framework
-1. **Supervised Machine Learning**:
-   - Classifies prominent mentions within debates (~81% accuracy with SVM).
-2. **Generalized Linear Mixed-Effects Models**:
-   - Examines factors influencing prominence at policy, group, and politician levels.
-3. **Data Integration**:
-   - Combines multiple data sources for robust analysis.
+**Title**: "Beyond Policy Influence: A Deeper Dive into the Factors Driving Advocacy Group Prominence"
 
----
+The original Master's thesis investigating interest group prominence in legislative debates using data from the 114th and 115th U.S. Congress sessions.
 
-## Subfolder Summaries
+**Key Achievements**:
+- Analysis of ~77,000 legislative documents
+- 81% accuracy with SVM classifier for interest group mention classification
+- Novel insights into advocacy group prominence factors
 
-### **1. Data Collection**
-- **Purpose**: Scripts to gather legislative data, policy metadata, and congressional profiles.
-- **Key Scripts**:
-  - `1.govinfo_data_fetcher.py`: Collects legislative transcripts.
-  - `7.fetch_bill_data.py`: Gathers metadata on bills.
-  - `policy_salience_pipeline.py`: Analyzes public interest using Google Trends.
-- **Outputs**:
-  - Legislative transcripts, bill metadata, and salience metrics.
+➡️ **[View Original Thesis](./original-thesis-2023/README.md)**
 
 ---
 
-### **2. Data Processing**
-- **Purpose**: Refines, cleans, and structures raw data.
-- **Key Scripts**:
-  - `process_api_results.py`: Processes API responses.
-  - `assign_speakers_to_granules.py`: Links legislative text to speakers.
-  - `policy_area_mapper.py`: Maps committees and topics to policy areas.
-- **Outputs**:
-  - Structured datasets and speaker-text mappings.
+## 🚀 Updated Project (2024) - CURRENT
+
+**Enhanced Research**: Building upon the original thesis with improved methodologies, updated data, and refined analysis.
+
+**Improvements**:
+- [To be documented as you add your updated project]
+- Enhanced data processing techniques
+- Updated statistical models
+- Expanded dataset coverage
+
+➡️ **[View Updated Project](./updated-project-2024/README.md)**
 
 ---
 
-### **3. Supervised Learning Classifiers**
-- **Purpose**: Builds and evaluates machine learning models for classifying prominence.
-- **Key Script**:
-  - `text_classifier_pipeline.py`: Handles preprocessing, training, evaluation, and labeling of data.
-- **Outputs**:
-  - Classification reports, labeled datasets, and predictions.
+## Navigation Guide
+
+| What you're looking for | Go to |
+|------------------------|-------|
+| Original thesis methodology | `original-thesis-2023/` |
+| Updated research approach | `updated-project-2024/` |
+| Historical results (2023) | `original-thesis-2023/results/` |
+| Current results | `updated-project-2024/results/` |
+| All documentation | Both `*/README.md` files |
 
 ---
 
-### **4. Modeling and Analysis**
-- **Purpose**: Analyzes factors influencing prominence through advanced statistical models.
-- **Key Scripts**:
-  - `model_policy_salience.R`: Explores the role of public salience in prominence.
-  - `DataProcessingAndRegression.py`: Prepares data for regression and modeling.
-- **Outputs**:
-  - Regression models, cleaned datasets, and statistical summaries.
+## Academic Citation
 
----
-
-### **5. Visualization and Reporting**
-- **Purpose**: Visualizes findings and compiles reports for academic and policy audiences.
-- **Key Documents**:
-  - `Technical Report MA Thesis.pdf`: Summarizes methods and findings.
-  - `Thesis_UvA_Kaleb_Mazurek.pdf`: Comprehensive thesis document.
-- **Insights**:
-  - Advocacy prominence is shaped by lobbying, policy engagement, and niche focus.
-  - Seniority in politicians and high-salience issues may not guarantee greater visibility.
-
----
-
-## Key Findings
-- **Policy Salience**:
-  - Medium-salience issues increase prominence, while high-salience areas show mixed effects.
-- **Group Characteristics**:
-  - Lobbying expenditure and broad policy engagement are significant predictors of prominence.
-- **Speaker Attributes**:
-  - Seniority and election-year status exhibit unexpected negative or mixed effects.
-
----
-
-## Prerequisites
-1. **Python**: Install dependencies with:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. **R**: Install required libraries:
-   ```R
-   install.packages(c("lme4", "ggplot2", "broom.mixed"))
-   ```
-3. **API Keys**: Obtain keys for GovInfo, Congress API, and Google Trends.
-
----
-
-## Usage Instructions
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/username/MastersThesis_InterestGroupAnalysis.git
-   ```
-2. Navigate to subfolders and review their README files for script-specific instructions.
-3. Run scripts sequentially for each stage:
-   - Data Collection → Data Processing → Machine Learning → Modeling → Visualization.
-
----
-
-## Contribution
-Contributions are welcome! Fork the repository and submit pull requests for improvements.
-
----
-
-## Citation
-If using this repository for your research, please cite:
-
+### Original Thesis (2023)
 Mazurek, Kaleb. *Beyond Policy Influence: A Deeper Dive into the Factors Driving Advocacy Group Prominence*. University of Amsterdam, 2023.
+
+### Updated Research (2024)
+[To be updated with new citation information]
 
 ---
 
 ## License
 This repository is licensed under the MIT License. See `LICENSE` for details.
 
---- 
+---
+
+*This repository demonstrates the iterative nature of academic research, showcasing both the original completed thesis and ongoing improvements to the methodology and analysis.*
