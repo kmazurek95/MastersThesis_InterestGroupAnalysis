@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use this software or data, please cite it as below."
+type: software
+title: "Interest Group Analysis: Legislative Prominence Research"
+abstract: "A reproducible research pipeline for analyzing interest group prominence in U.S. Congressional debates using natural language processing, machine learning, and multilevel statistical modeling."
+authors:
+  - family-names: Mazurek
+    given-names: Kaleb
+    email: kalebmazurek@gmail.com
+    orcid: 'https://orcid.org/0000-0000-0000-0000'  # Replace with actual ORCID if available
+repository-code: 'https://github.com/kmazurek95/MastersThesis_InterestGroupAnalysis'
+url: 'https://github.com/kmazurek95/MastersThesis_InterestGroupAnalysis'
+license: MIT
+version: 2.0.0-alpha
+date-released: '2024-11-25'
+keywords:
+  - interest groups
+  - congressional record
+  - political science
+  - natural language processing
+  - machine learning
+  - reproducible research
+  - computational social science
+  - lobbying
+  - legislative prominence
+  - text classification
+
+references:
+  - type: thesis
+    authors:
+      - family-names: Mazurek
+        given-names: Kaleb
+    title: "Beyond Policy Influence: A Deeper Dive into the Factors Driving Advocacy Group Prominence"
+    institution:
+      name: University of Amsterdam
+    thesis-type: "Master's Thesis"
+    year: 2023
+    department: Political Science
