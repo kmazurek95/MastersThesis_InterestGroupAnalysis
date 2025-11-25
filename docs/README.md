@@ -1,47 +1,35 @@
-# Documentation Directory
+# Documentation
 
-**Purpose**: Comprehensive project documentation
+**Purpose**: Complete documentation for the `multi_level_data` dataset and reproducibility
 
 ---
 
 ## Contents
 
-This directory contains detailed documentation for:
+This directory will contain:
 
-- **Data specifications** and variable definitions
-- **Reproducibility guides** for replicating the analysis
-- **API setup** instructions for data collection
-- **Best practices** for extending the pipeline
+- **`data_dictionary.md`** - Complete variable definitions and data types (coming soon)
+- **`reproducibility_guide.md`** - Step-by-step guide to reproducing thesis results (coming soon)
 
 ---
 
-## Documentation Files
+## Current Documentation
 
-### Core Documentation (Phase 2 - Coming December 2024)
+For now, see:
 
-- **`data_dictionary.md`** - Complete variable reference for all datasets
-- **`multi_level_data_specification.md`** - Detailed specification of the anchor dataset
-- **`reproducibility_notes.md`** - Step-by-step guide to reproducing thesis results
-- **`api_setup_guide.md`** - How to obtain and configure API credentials
-
-### Additional Documentation (Planned)
-
-- **`contributing.md`** - Guidelines for contributing to the project
-- **`code_of_conduct.md`** - Community standards and expectations
-- **`methodology.md`** - Detailed explanation of research methods
-- **`troubleshooting.md`** - Common issues and solutions
+- **[data/multi_level_data/README.md](../data/multi_level_data/README.md)** - Dataset documentation
+- **[analysis/README.md](../analysis/README.md)** - How to run analyses
+- **[legacy/README.md](../legacy/README.md)** - Legacy code documentation
 
 ---
 
-## Documentation Standards
+## Contact
 
-All documentation should:
+For questions about documentation:
 
-✅ Use clear, concise language
-✅ Include examples where appropriate
-✅ Be kept up-to-date with code changes
-✅ Follow Markdown formatting conventions
-✅ Include table of contents for long documents
+**Kaleb Mazurek**
+- Email: kalebmazurek@gmail.com
+- GitHub: [@kmazurek95](https://github.com/kmazurek95)
 
 ---
 

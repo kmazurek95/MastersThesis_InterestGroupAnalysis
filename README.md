@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Research Status: Modernizing](https://img.shields.io/badge/status-modernizing-orange.svg)]()
+[![Research: Completed](https://img.shields.io/badge/research-completed-green.svg)]()
 
 > **Beyond Policy Influence: A Deeper Dive into the Factors Driving Advocacy Group Prominence**
 >
@@ -28,28 +28,24 @@ This repository contains research examining **why some advocacy organizations re
 
 ---
 
-## 📣 Repository Status: Modernization in Progress
+## 📣 Repository Purpose
 
-### What's New (November 2024)
+This repository serves two main purposes:
 
-This repository is undergoing a **comprehensive modernization** to transform the original thesis code into a **fully reproducible research pipeline**.
+### 1. **Legacy Code Archive** 📚
 
-#### ✅ Completed
-- **Legacy code archived** with full documentation of limitations
-- **New repository structure** designed for reproducibility
-- **Ground truth dataset created**: `multi_level_data` as the reproducibility anchor
+The `/legacy/` folder contains the **original thesis code** exactly as it existed during the 2023 research. This code is preserved for:
+- Historical reference and transparency
+- Understanding the original methodology
+- Learning about the research process
 
-#### 🚧 In Progress
-- **Modular pipeline development**: Rebuilding from raw data to analysis
-- **Comprehensive documentation**: Data dictionaries, API guides, reproducibility notes
-- **Best practices implementation**: Version control, testing, containerization
+⚠️ **Important**: The legacy code is **not fully reproducible** due to manual steps, missing intermediate data, and ad-hoc processing. See [`legacy/README.md`](./legacy/README.md) for details.
 
-#### 📋 Planned
-- **Extension to new Congress sessions** (2024-2025)
-- **Automated validation and testing**
-- **Interactive data exploration tools**
+### 2. **Reproducible Dataset** 🎯
 
-👉 **See [ROADMAP.md](./ROADMAP.md) for the full development timeline**
+The **`multi_level_data`** dataset provides a **validated, analysis-ready starting point** for reproducing and extending the thesis findings.
+
+**This dataset is the ONLY reproducible component** of this repository.
 
 ---
 
@@ -59,9 +55,6 @@ This repository is undergoing a **comprehensive modernization** to transform the
 .
 ├── README.md                      # This file
 ├── LICENSE                        # MIT License
-├── MIGRATION_PLAN.md              # Detailed transition strategy
-├── ROADMAP.md                     # Future development timeline
-├── CITATION.cff                   # Citation metadata
 │
 ├── legacy/                        # ⚠️ ORIGINAL THESIS CODE (2023)
 │   ├── README.md                  # Why legacy code is not reproducible
@@ -73,79 +66,108 @@ This repository is undergoing a **comprehensive modernization** to transform the
 │       ├── Thesis_UvA_Kaleb_Mazurek.pdf
 │       └── Technical Report MA Thesis.pdf
 │
-├── data/                          # 📊 DATA ORGANIZATION
-│   ├── README.md                  # Data documentation and versioning
-│   ├── raw/                       # Raw API outputs (not in git)
-│   ├── processed/                 # Cleaned, structured datasets
-│   │   └── multi_level_data/      # 🎯 REPRODUCIBILITY ANCHOR
-│   ├── interim/                   # Intermediate processing outputs
-│   └── external/                  # Third-party datasets
+├── data/                          # 📊 DATA
+│   └── multi_level_data/          # 🎯 THE REPRODUCIBILITY ANCHOR
+│       ├── README.md              # Complete dataset documentation
+│       └── multi_level_data_v1.0.parquet  # The dataset (if available)
 │
-├── pipeline/                      # 🔬 MODERN REPRODUCIBLE PIPELINE
-│   ├── README.md                  # Pipeline documentation
-│   ├── 01_data_collection/        # Modular data collection scripts
-│   ├── 02_data_processing/        # Validated processing functions
-│   ├── 03_machine_learning/       # Classifier training and evaluation
-│   ├── 04_analysis/               # Statistical modeling
-│   └── utils/                     # Shared helper functions
-│
-├── docs/                          # 📚 COMPREHENSIVE DOCUMENTATION
-│   ├── data_dictionary.md         # Variable definitions
-│   ├── reproducibility_notes.md   # Step-by-step reproduction guide
-│   ├── multi_level_data_specification.md
-│   └── api_setup_guide.md         # GovInfo/Congress API setup
+├── analysis/                      # 📈 REPRODUCIBLE ANALYSIS
+│   ├── README.md                  # How to reproduce thesis findings
+│   ├── notebooks/                 # Jupyter notebooks for analysis
+│   │   ├── 01_data_exploration.ipynb
+│   │   ├── 02_descriptive_statistics.ipynb
+│   │   ├── 03_reproduce_thesis_results.ipynb
+│   │   └── 04_extended_analyses.ipynb
+│   └── scripts/                   # R/Python scripts for modeling
+│       ├── multilevel_models.R
+│       └── visualizations.py
 │
 ├── outputs/                       # 📈 ANALYSIS OUTPUTS
 │   ├── figures/                   # Publication-ready plots
-│   ├── tables/                    # Regression tables and summaries
-│   └── models/                    # Trained model artifacts
+│   └── tables/                    # Regression tables
 │
-├── notebooks/                     # 📓 EXPLORATORY ANALYSIS
-│   └── README.md                  # Notebook documentation
-│
-└── tests/                         # ✅ UNIT AND INTEGRATION TESTS
-    └── README.md                  # Testing documentation
+└── docs/                          # 📚 DOCUMENTATION
+    ├── data_dictionary.md         # Variable definitions
+    └── reproducibility_guide.md   # Step-by-step reproduction
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start: Reproducing Thesis Results
 
-### For Researchers Using Existing Data
-
-If you want to **reproduce the thesis analysis** using the validated dataset:
+### Prerequisites
 
 ```bash
-# 1. Clone the repository
+# Python 3.8+
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install pandas numpy scikit-learn matplotlib seaborn jupyter
+
+# R 4.0+ (for statistical models)
+# In R console:
+install.packages(c("lme4", "ggplot2", "broom.mixed", "arrow"))
+```
+
+### Step 1: Access the Dataset
+
+```bash
+# Clone the repository
 git clone https://github.com/kmazurek95/MastersThesis_InterestGroupAnalysis.git
 cd MastersThesis_InterestGroupAnalysis
 
-# 2. Set up Python environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
-# 3. Access the ground truth dataset
-# See data/processed/multi_level_data/README.md for details
-
-# 4. Run analysis notebooks
-jupyter notebook notebooks/
+# Navigate to the dataset
+cd data/multi_level_data
 ```
 
-### For Researchers Collecting New Data
+**Note**: The dataset file may not be in the repository due to size. See [`data/multi_level_data/README.md`](./data/multi_level_data/README.md) for access instructions.
 
-If you want to **collect new Congressional Record data** for recent sessions:
+### Step 2: Load and Explore the Data
+
+**Python:**
+```python
+import pandas as pd
+
+# Load the dataset
+data = pd.read_parquet('data/multi_level_data/multi_level_data_v1.0.parquet')
+
+# Explore
+print(f"Total mentions: {len(data)}")
+print(f"Prominent mentions: {data['prominent'].sum()}")
+print(f"Date range: {data['date'].min()} to {data['date'].max()}")
+print(f"Policy areas: {data['policy_area'].nunique()}")
+```
+
+**R:**
+```r
+library(arrow)
+
+# Load the dataset
+data <- read_parquet("data/multi_level_data/multi_level_data_v1.0.parquet")
+
+# Explore
+dim(data)
+summary(data$prominent)
+table(data$policy_area)
+```
+
+### Step 3: Reproduce Thesis Results
+
+Run the provided analysis notebooks:
 
 ```bash
-# 1. Set up API credentials
-# See docs/api_setup_guide.md
+# Start Jupyter
+jupyter notebook analysis/notebooks/
 
-# 2. Run data collection pipeline
-cd pipeline/01_data_collection
-python fetch_congressional_records.py --congress 118 --year 2024
+# Run notebooks in order:
+# 1. 01_data_exploration.ipynb
+# 2. 02_descriptive_statistics.ipynb
+# 3. 03_reproduce_thesis_results.ipynb
+```
 
-# 3. Follow processing steps
-# See pipeline/README.md for full workflow
+Or run the R models directly:
+
+```bash
+Rscript analysis/scripts/multilevel_models.R
 ```
 
 ---
@@ -154,60 +176,37 @@ python fetch_congressional_records.py --congress 118 --year 2024
 
 ### What Is It?
 
-The **`multi_level_data`** file is a **cleaned, validated, hierarchical dataset** that serves as the **reproducibility anchor** for this project. It contains:
+The **`multi_level_data`** dataset is a **cleaned, validated, hierarchical dataset** that contains:
 
-- **77,000+ Congressional Record documents** (2014-2018)
-- **Processed paragraphs** with speaker assignments
-- **Interest group mentions** with prominence labels
-- **Machine learning predictions** (SVM classifier outputs)
-- **Speaker metadata** (seniority, party, state, committee membership)
-- **Group-level variables** (lobbying expenditure, policy focus, membership)
-- **Policy-level variables** (salience, topic categories)
+- ✅ **77,000+ Congressional Record documents** (2014-2018)
+- ✅ **Processed paragraphs** with speaker assignments
+- ✅ **Interest group mentions** with prominence labels
+- ✅ **Machine learning predictions** (SVM classifier outputs)
+- ✅ **Speaker metadata** (seniority, party, state, committee membership)
+- ✅ **Group-level variables** (lobbying expenditure, policy focus, membership)
+- ✅ **Policy-level variables** (salience, topic categories)
 
-### Why Use It?
+### Why Start Here?
 
-The original thesis pipeline had **manual steps** and **missing intermediate data** that prevent full reproduction. The `multi_level_data` dataset provides:
+The original thesis pipeline had **manual steps** and **missing intermediate data** that prevent full reproduction from raw Congressional Record data. The `multi_level_data` dataset provides:
 
-✅ **Validated ground truth** for all thesis findings
-✅ **Complete variable documentation** with data dictionary
-✅ **Consistent structure** for reproducible analysis
-✅ **Version control** with documented data provenance
+✅ **Complete reproducibility** for all thesis findings
+✅ **Validated ground truth** - all variables checked and documented
+✅ **Analysis-ready format** - no preprocessing needed
+✅ **Comprehensive documentation** - data dictionary with all variables
 
-### How to Use It
+### Structure
 
-See **[docs/multi_level_data_specification.md](./docs/multi_level_data_specification.md)** for:
+```
+Hierarchical levels:
+  Policy Areas (Level 3)
+      └── Interest Groups (Level 2)
+          └── Mentions (Level 1)
+              └── Paragraphs
+                  └── Congressional Record Documents
+```
 
-- Variable definitions and data types
-- Hierarchical structure (mentions nested in paragraphs in documents)
-- Missing data patterns and handling
-- Example analysis code
-
----
-
-## 🔬 Research Methodology
-
-### 1. Data Collection
-- **Source**: GovInfo API (Congressional Record, 2014-2018)
-- **Volume**: 77,000+ legislative documents
-- **Metadata**: Congress.gov API (member profiles, bill data)
-- **External Data**: Washington Representatives Study, Google Trends
-
-### 2. Natural Language Processing
-- **Speaker Assignment**: Rule-based heuristics with manual validation
-- **Interest Group Extraction**: Pattern matching + Named Entity Recognition
-- **Duplicate Detection**: TF-IDF cosine similarity filtering
-
-### 3. Supervised Learning
-- **Training Data**: 2,000 hand-labeled mentions
-- **Models**: Support Vector Machines, Naive Bayes, Random Forest
-- **Best Performance**: SVM with 81% accuracy, 0.79 F1-score
-- **Features**: TF-IDF, speaker role, policy area, temporal features
-
-### 4. Statistical Modeling
-- **Framework**: Generalized Linear Mixed-Effects Models (GLMM)
-- **Dependent Variable**: Prominence (binary, from classifier)
-- **Levels**: Policy area (Level 3), Interest group (Level 2), Mention (Level 1)
-- **Software**: R with `lme4`, `broom.mixed`, `ggplot2`
+**See**: [`data/multi_level_data/README.md`](./data/multi_level_data/README.md) for complete documentation.
 
 ---
 
@@ -228,14 +227,31 @@ See **[docs/multi_level_data_specification.md](./docs/multi_level_data_specifica
 **Example of routine mention**:
 > "We received letters from the AMA and several other organizations."
 
-### Why Study Prominence?
+---
 
-Traditional lobbying research focuses on **policy outcomes** (did the group win?). But prominence captures:
+## 🔬 Research Methodology
 
-- **Recognition and credibility** before policy decisions are made
-- **Soft power** dynamics in legislative discourse
-- **Differential treatment** of groups by policymakers
-- **Reputation building** as a resource for future influence
+### 1. Data Collection (2014-2018)
+- **Source**: GovInfo API (Congressional Record)
+- **Volume**: 77,000+ legislative documents
+- **Metadata**: Congress.gov API (member profiles, bill data)
+- **External Data**: Washington Representatives Study, Google Trends
+
+### 2. Natural Language Processing
+- **Speaker Assignment**: Rule-based heuristics (~85-90% accuracy)
+- **Interest Group Extraction**: Pattern matching + Named Entity Recognition
+- **Duplicate Detection**: TF-IDF cosine similarity filtering
+
+### 3. Supervised Learning
+- **Training Data**: 2,000 hand-labeled mentions
+- **Models**: Support Vector Machines, Naive Bayes, Random Forest
+- **Best Performance**: SVM with 81% accuracy, 0.79 F1-score
+
+### 4. Statistical Modeling
+- **Framework**: Generalized Linear Mixed-Effects Models (GLMM)
+- **Dependent Variable**: Prominence (binary, from classifier)
+- **Levels**: Policy area (Level 3), Interest group (Level 2), Mention (Level 1)
+- **Software**: R with `lme4`, `broom.mixed`, `ggplot2`
 
 ---
 
@@ -243,64 +259,68 @@ Traditional lobbying research focuses on **policy outcomes** (did the group win?
 
 ### Essential Reading
 
-1. **[docs/reproducibility_notes.md](./docs/reproducibility_notes.md)** - Step-by-step reproduction guide
-2. **[docs/data_dictionary.md](./docs/data_dictionary.md)** - Complete variable reference
-3. **[MIGRATION_PLAN.md](./MIGRATION_PLAN.md)** - Understanding the legacy→modern transition
+1. **[data/multi_level_data/README.md](./data/multi_level_data/README.md)** - Complete dataset documentation
+2. **[docs/data_dictionary.md](./docs/data_dictionary.md)** - All variable definitions (coming soon)
+3. **[docs/reproducibility_guide.md](./docs/reproducibility_guide.md)** - Step-by-step reproduction (coming soon)
 4. **[legacy/README.md](./legacy/README.md)** - Why original code is not reproducible
 
-### API Setup
+### Thesis Documents
 
-- **[docs/api_setup_guide.md](./docs/api_setup_guide.md)** - GovInfo and Congress.gov API credentials
-
-### Technical Reports
-
-- **[legacy/5. Visualization and Reporting/Technical Report MA Thesis.pdf](./legacy/5.%20Visualization%20and%20Reporting/Technical%20Report%20MA%20Thesis.pdf)** - Original methodology document
 - **[legacy/5. Visualization and Reporting/Thesis_UvA_Kaleb_Mazurek.pdf](./legacy/5.%20Visualization%20and%20Reporting/Thesis_UvA_Kaleb_Mazurek.pdf)** - Full thesis manuscript
+- **[legacy/5. Visualization and Reporting/Technical Report MA Thesis.pdf](./legacy/5.%20Visualization%20and%20Reporting/Technical%20Report%20MA%20Thesis.pdf)** - Technical methodology
 
 ---
 
-## 🛠️ Technical Stack
+## 🎓 Using This Repository
 
-### Current (Legacy)
-- **Python 3.7+** (pandas, scikit-learn, BeautifulSoup, requests)
-- **R 4.0+** (lme4, ggplot2, broom.mixed)
-- Ad-hoc scripts and notebooks
+### For Researchers Wanting to Reproduce Results
 
-### Planned (Modern Pipeline)
-- **Python 3.10+** with pinned dependencies
-- **Docker** for environment consistency
-- **DVC** for data version control
-- **pytest** for automated testing
-- **Sphinx** for documentation generation
-- **GitHub Actions** for CI/CD
+1. **Access** the `multi_level_data` dataset
+2. **Load** the data in Python or R
+3. **Run** the analysis notebooks in `/analysis/`
+4. **Compare** your results with the thesis findings
+
+### For Researchers Wanting to Extend the Analysis
+
+1. **Start** with the `multi_level_data` dataset
+2. **Explore** alternative models or variables
+3. **Test** new hypotheses about prominence
+4. **Contribute** your findings back (via pull request)
+
+### For Researchers Wanting to Understand the Methodology
+
+1. **Read** the thesis PDF for conceptual framework
+2. **Review** the legacy code to see original implementation
+3. **Consult** the data dictionary for variable definitions
+4. **Examine** the technical report for detailed methods
+
+### For Teachers/Students Learning Computational Social Science
+
+1. **Use** as a case study in research transparency
+2. **Discuss** the tradeoffs between exploratory research and reproducibility
+3. **Practice** multilevel modeling with real political science data
+4. **Learn** from both successes and documented limitations
 
 ---
 
-## 🤝 Contributing
+## ⚠️ What This Repository Does NOT Provide
 
-This project is transitioning to a fully reproducible research pipeline. Contributions are welcome!
+❌ **Raw Congressional Record data** - Too large, must be collected via API
+❌ **Full pipeline from scratch** - Manual steps and missing data prevent this
+❌ **Data collection scripts that work out-of-the-box** - Legacy code requires adaptation
+❌ **New data for recent Congresses** - Covers 2014-2018 only
 
-### Priority Areas
-
-1. **Testing**: Unit tests for data processing functions
-2. **Documentation**: Improving data dictionaries and code comments
-3. **Validation**: Cross-checking legacy outputs with new pipeline
-4. **Extension**: Collecting data for 2024-2025 Congress
-
-### How to Contribute
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Make your changes with tests and documentation
-4. Submit a pull request
-
-See **[CONTRIBUTING.md](./CONTRIBUTING.md)** (coming soon) for detailed guidelines.
+**What it DOES provide:**
+✅ **Complete reproducibility from the validated dataset**
+✅ **Transparent documentation of limitations**
+✅ **All code and decisions from original research**
+✅ **Analysis-ready data for extensions**
 
 ---
 
 ## 📜 Citation
 
-If you use this code or data in your research, please cite:
+If you use this data or methodology in your research, please cite:
 
 ### Thesis Citation
 
@@ -315,7 +335,7 @@ If you use this code or data in your research, please cite:
 }
 ```
 
-### Dataset Citation (Multi-Level Data)
+### Dataset Citation
 
 ```bibtex
 @dataset{mazurek2024multilevel,
@@ -332,13 +352,13 @@ If you use this code or data in your research, please cite:
 ## 📧 Contact
 
 **Kaleb Mazurek**
-Email: kalebmazurek@gmail.com
-GitHub: [@kmazurek95](https://github.com/kmazurek95)
+- Email: kalebmazurek@gmail.com
+- GitHub: [@kmazurek95](https://github.com/kmazurek95)
 
 For questions about:
-- **Original thesis methodology**: See [legacy/README.md](./legacy/README.md)
-- **Reproducibility**: See [docs/reproducibility_notes.md](./docs/reproducibility_notes.md)
-- **Data access**: See [data/README.md](./data/README.md)
+- **Dataset access**: See [data/multi_level_data/README.md](./data/multi_level_data/README.md)
+- **Reproducing results**: See [docs/reproducibility_guide.md](./docs/reproducibility_guide.md)
+- **Original methodology**: See [legacy/README.md](./legacy/README.md)
 - **Technical issues**: [Open a GitHub issue](https://github.com/kmazurek95/MastersThesis_InterestGroupAnalysis/issues)
 
 ---
@@ -362,19 +382,11 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - **U.S. Government Publishing Office** - GovInfo API access
 - **Library of Congress** - Congress.gov API
 
-### Inspiration
+### Philosophy
 
-This project demonstrates that **research transparency** means acknowledging both successes and limitations:
+This repository demonstrates that **research transparency** means acknowledging both successes and limitations:
 
-> "Science is a process, not a product. Reproducibility is something we build toward, not something we achieve on the first try."
-
-### Future Researchers
-
-If you're building on this work:
-- Start with the **`multi_level_data`** dataset
-- Learn from the **legacy code's limitations**
-- Contribute to the **modern pipeline**
-- Ask questions via **GitHub issues**
+> "Science is a process, not a product. Perfect reproducibility from the first step is rarely achievable in exploratory research. What matters is providing a validated starting point for future work."
 
 ---
 
@@ -386,12 +398,11 @@ If you're building on this work:
 - **Hand-Labeled Training Data**: 2,000 mentions
 - **Classification Accuracy**: 81% (SVM model)
 - **Statistical Models**: 3 levels (policy/group/mention)
+- **Reproducible from**: `multi_level_data` dataset (validated)
 
 ---
 
-**Repository Status**: Modernization in progress (November 2024)
 **Last Updated**: November 25, 2024
-**Version**: 2.0.0-alpha
+**Version**: 2.0.0
 
 ---
-
