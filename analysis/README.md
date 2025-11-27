@@ -14,15 +14,10 @@ This directory contains all code needed to reproduce the thesis findings using t
 
 ```
 analysis/
-├── README.md                          # This file
-├── notebooks/                         # Jupyter notebooks
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_descriptive_statistics.ipynb
-│   ├── 03_reproduce_thesis_results.ipynb
-│   └── 04_extended_analyses.ipynb
-└── scripts/                           # Standalone scripts
-    ├── multilevel_models.R
-    └── visualizations.py
+├── README.md                                      # This file
+├── 01_Exploratory_Prominence_Analysis.ipynb      # ⭐ MAIN ANALYSIS - START HERE
+├── 02_Statistical_Models.ipynb                   # Statistical modeling in Python
+└── 03_Multilevel_Models.Rmd                      # R-based GLMM models
 ```
 
 ---
@@ -45,95 +40,69 @@ install.packages(c("lme4", "ggplot2", "broom.mixed", "arrow", "dplyr"))
 ### Run Analysis Notebooks
 
 ```bash
-# Start Jupyter
-jupyter notebook analysis/notebooks/
+# Navigate to analysis directory
+cd analysis
 
-# Run notebooks in order:
-# 1. 01_data_exploration.ipynb - Load and explore the dataset
-# 2. 02_descriptive_statistics.ipynb - Summary tables and basic visualizations
-# 3. 03_reproduce_thesis_results.ipynb - Replicate all thesis findings
-# 4. 04_extended_analyses.ipynb - Additional analyses and robustness checks
+# Start Jupyter and open the main analysis
+jupyter notebook 01_Exploratory_Prominence_Analysis.ipynb
+
+# Or run all notebooks in order:
+jupyter notebook
+# Then open:
+# 1. 01_Exploratory_Prominence_Analysis.ipynb - Main exploratory analysis
+# 2. 02_Statistical_Models.ipynb - Statistical modeling
 ```
 
-### Run Statistical Models
+### Run R Models
 
 ```bash
-# Run R multilevel models
-Rscript analysis/scripts/multilevel_models.R
-
-# Generate Python visualizations
-python analysis/scripts/visualizations.py
+# Open in RStudio or render via command line
+Rscript -e "rmarkdown::render('analysis/03_Multilevel_Models.Rmd')"
 ```
 
 ---
 
 ## Notebooks
 
-### 01_data_exploration.ipynb
+### 01_Exploratory_Prominence_Analysis.ipynb ⭐
 
-- Load the `multi_level_data` dataset
-- Explore data structure and variables
-- Check data quality (missing values, outliers)
-- Generate summary statistics
+**The centerpiece of the portfolio analysis**
 
-### 02_descriptive_statistics.ipynb
+- Load and explore the prominence dataset
+- Comprehensive data visualization
+- Descriptive statistics and patterns
+- Initial insights into prominence drivers
+- **START HERE** for understanding the project
 
-- Descriptive tables for variables
-- Prominence rates by policy area, group type, year
-- Distributions of key predictors
-- Correlation matrices
+### 02_Statistical_Models.ipynb
 
-### 03_reproduce_thesis_results.ipynb
+**Python-based statistical analysis**
 
-- Reproduce all thesis tables and figures
-- Multilevel model results
-- Model diagnostics and fit statistics
-- Compare with published results
+- Fit statistical models in Python
+- Test hypotheses about prominence
+- Model comparisons and diagnostics
+- Visualize model results
 
-### 04_extended_analyses.ipynb
+### 03_Multilevel_Models.Rmd
 
-- Alternative model specifications
-- Robustness checks
-- Additional hypotheses
-- Exploratory visualizations
+**Advanced R-based analysis**
 
----
+- Generalized Linear Mixed-Effects Models (GLMM)
+- Reproduce thesis findings in R
+- Publication-ready tables
+- Random effects structure analysis
 
-## Scripts
-
-### multilevel_models.R
-
-Generalized Linear Mixed-Effects Models (GLMM) for prominence:
-
+**Key model specification:**
 ```r
-# Model specification from thesis
 model <- glmer(
     prominent ~
         lobbying_expenditure + policy_breadth + membership_size +
-        speaker_seniority + speaker_party +
-        policy_salience +
+        speaker_seniority + speaker_party + policy_salience +
         (1 | policy_area) + (1 | interest_group_name),
     data = data,
     family = binomial
 )
 ```
-
-**Outputs**:
-- Model summaries
-- Coefficient tables
-- Variance components
-- Model diagnostics
-
-### visualizations.py
-
-Publication-ready figures:
-
-- Prominence by policy area (bar chart)
-- Lobbying expenditure vs. prominence (scatter)
-- Temporal trends (line plots)
-- Model coefficient plots
-
-**Outputs** saved to `outputs/figures/`
 
 ---
 

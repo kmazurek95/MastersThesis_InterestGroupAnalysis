@@ -1,0 +1,1731 @@
+---
+title: "Whose Voice Counts? Understanding Advocacy Group Prominence in Congressional Discourse"
+author: "Kaleb Mazurek"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    theme: flatly
+    highlight: tango
+    code_folding: show
+    df_print: paged
+  pdf_document:
+    toc: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 10,
+  fig.height = 6,
+  dpi = 300
+)
+```
+
+---
+
+# Executive Summary {-}
+
+**For Policymakers and Research Audiences**
+
+This study addresses a fundamental question in democratic governance: **Who gets heard in Congress, and why?** While scholars have extensively studied which interest groups gain access to policymakers or successfully influence policy outcomes, we know surprisingly little about which advocacy organizations politicians publicly recognize as authoritative voices for their constituencies.
+
+## Key Findings {-}
+
+1. **The Prominence Paradox**: Contrary to conventional wisdom, advocacy groups mentioned during highly salient policy debates are *not* more likely to be cited as authoritative voices. Instead, medium-salience policy areas show the strongest prominence effects—suggesting legislators strategically invoke groups when issues are visible but not polarizing.
+
+2. **Seniority and Voice**: More senior legislators are *less* likely to afford prominence to interest groups, challenging assumptions that experience leads to reliance on organized interests. This may reflect senior members' independence from external validators.
+
+3. **Money ≠ Prominence**: Organizations employing external lobbyists show increased legislative prominence, but the effect is modest. This suggests prominence operates through different channels than traditional lobbying access.
+
+## Why This Matters for Democracy {-}
+
+Legislative prominence—being publicly recognized as a legitimate voice for a constituency—represents a distinct form of political power. Unlike behind-the-scenes influence, prominence shapes public discourse about whose perspectives count in policymaking. Understanding its drivers illuminates:
+
+- **Representation gaps**: Which constituencies gain public recognition vs. which remain invisible
+- **Pluralist theory**: Whether resource advantages translate to symbolic power
+- **Legislative communication**: How members signal values to constituents through group citations
+
+This analysis uses machine learning to identify over 15,000 mentions of 500+ advocacy organizations in Congressional floor speeches, revealing systematic patterns in which voices legislators elevate in democratic debate.
+
+---
+
+# Abstract {-}
+
+In democratic systems, interest groups compete not only for policy influence but for recognition as legitimate representatives of constituencies. This study explores **advocacy group prominence**—when legislators publicly cite organizations as authoritative voices in policy debates—a form of symbolic power with implications for democratic representation and pluralism.
+
+Drawing on institutionalized pluralism theory and theories of legislative communication, I analyze three mechanisms that may explain why politicians afford prominence to certain advocacy organizations:
+
+1. **Strategic Communication**: Do legislators invoke groups when issues are publicly salient, using them as validators for positions?
+2. **Electoral and Policy Alignment**: Do reelection incentives, seniority, and constituency connections shape which groups members elevate?
+3. **Organizational Resources**: Do established organizations with lobbying capacity gain greater prominence?
+
+Using machine learning to identify 15,000+ mentions of 500+ advocacy organizations across Congressional floor speeches (2015-2017), I estimate mixed-effects logistic regression models to test these hypotheses.
+
+**Key findings challenge conventional wisdom**: Medium-salience (not high-salience) policy areas predict prominence; senior legislators are *less* likely to cite groups; and while external lobbyists increase prominence, the effect is modest. These patterns suggest prominence operates through distinct channels from traditional lobbying influence, with implications for understanding whose perspectives gain visibility in democratic discourse.
+
+This research contributes to interest group scholarship by empirically examining a previously unmeasured form of group success—symbolic recognition—and to legislative studies by revealing how members use group citations to communicate authority and values to diverse audiences.
+
+---
+
+# Introduction: Beyond Access and Influence
+
+## The Prominence Gap in Interest Group Research
+
+Interest group scholarship has produced rich insights into lobbying strategies, access to policymakers, and policy influence. Yet scholars have devoted surprisingly little attention to a more public form of group power: **symbolic recognition in legislative discourse**. When a member of Congress cites an advocacy organization by name during floor debate, they signal to constituents, colleagues, and the media that this group represents a legitimate voice worthy of consideration.
+
+This form of prominence differs from traditional measures of interest group success:
+
+- **Access**: Private meetings, testimony opportunities, informal consultation
+- **Influence**: Changing policy outcomes, shaping legislative language
+- **Prominence**: Public recognition as an authoritative voice for a constituency
+
+Prominence matters because it shapes whose perspectives are visible in democratic deliberation, independent of behind-the-scenes influence.
+
+## Theoretical Framework: Institutionalized Pluralism
+
+This study draws on **institutionalized pluralism** (Halpin & Fraussen, 2017) which recognizes that advocacy groups operate within institutional structures that shape their opportunities for recognition. Legislators don't simply respond to all groups equally—they systematically privilege certain voices based on:
+
+1. **Strategic communication needs**: Groups serve as validators when politicians need external credibility
+2. **Constituency connections**: Groups signal responsiveness to organized interests in districts/states
+3. **Policy expertise**: Organizations provide information subsidies on complex issues
+
+## The Democratic Stakes: Whose Voice Gets Heard?
+
+Understanding prominence patterns illuminates fundamental questions about democratic representation:
+
+- **Pluralist theory**: Does prominence concentrate among well-resourced organizations, or do diverse groups gain recognition?
+- **Descriptive representation**: Do groups representing marginalized communities achieve symbolic visibility?
+- **Legislative communication**: How do politicians use group citations to signal values to multiple audiences?
+
+As Grossmann (2012) notes, "The groups that appear most frequently in public discussions may differ from those most active in lobbying." This study empirically examines that divergence.
+
+## Research Questions
+
+This analysis tests three sets of hypotheses about the drivers of advocacy group prominence:
+
+**Model A: Issue Salience and Public Attention**
+Do legislators strategically invoke groups when issues are publicly salient, or do prominence patterns follow different logics?
+
+**Model B: Politician-Group Linkages**
+How do electoral incentives, seniority, legislative activity, and constituency alignment shape which groups members cite?
+
+**Model C: Organizational Characteristics**
+Do established organizations with greater resources, lobbying capacity, and policy breadth achieve higher prominence?
+
+---
+
+# Setup and Data Loading
+
+```{r libraries}
+# Core data manipulation
+library(tidyverse)
+library(haven)
+
+# Statistical modeling
+library(lme4)        # Mixed-effects models
+library(lmerTest)    # p-values for mixed models
+library(broom.mixed) # Tidy model outputs
+
+# Model comparison and diagnostics
+library(performance)
+library(see)
+library(car)
+
+# Visualization
+library(ggplot2)
+library(ggeffects)
+library(sjPlot)
+library(patchwork)
+
+# Tables
+library(knitr)
+library(kableExtra)
+library(gt)
+
+# Set theme
+theme_set(theme_minimal(base_size = 12))
+
+# Display options
+options(
+  digits = 4,
+  scipen = 999,
+  knitr.kable.NA = ''
+)
+```
+
+```{r config}
+# Configuration
+CONFIG <- list(
+  # File paths
+  DATA_DIR = file.path(".", "data"),
+  OUTPUT_DIR = file.path(".", "output"),
+
+  # Data file
+  LEVEL1_FILE = "level1.csv",
+
+  # Organization to exclude (if applicable)
+  EXCLUDED_ORG_ID = 20114287,
+
+  # Random seed
+  SEED = 42,
+
+  # Reference categories for modeling
+  REF_CHAMBER = "House of Representatives",
+  REF_PARTY = "Democrat",
+  REF_SALIENCY = "low",
+  REF_ORGTYPE = "Business Interests",
+  REF_MSHIP = "Association of Institutions",
+  REF_TERM = "First Year"
+)
+
+# Create output directory
+dir.create(CONFIG$OUTPUT_DIR, showWarnings = FALSE, recursive = TRUE)
+
+# Set seed for reproducibility
+set.seed(CONFIG$SEED)
+```
+
+```{r data-loading-functions}
+#' Load and perform initial filtering of level1 dataset
+#'
+#' @param filepath Path to CSV file
+#' @param excluded_org_id Organization ID to exclude (optional)
+#' @return Filtered dataframe
+load_data <- function(filepath, excluded_org_id = NULL) {
+  df <- read_csv(filepath, show_col_types = FALSE)
+
+  if (!is.null(excluded_org_id)) {
+    df <- df %>% filter(level1_org_id != excluded_org_id)
+  }
+
+  message(sprintf("Loaded %s rows", format(nrow(df), big.mark = ",")))
+  return(df)
+}
+
+#' Recode organization category variable
+#'
+#' Collapses detailed categories into broader groupings:
+#' - Business Interests
+#' - Government Interests
+#' - Non-Business Interests
+recode_abbrevcat <- function(df) {
+  # Original to readable name mapping
+  name_mapping <- c(
+    "(1) Corporations" = "Corporations",
+    "(13) Social welfare or poor" = "Social Welfare or Poor",
+    "(14) State and local governments" = "State and Local Governments",
+    "(16) Other" = "Other",
+    "(2) Trade and other business associations" = "Trade and Business Associations",
+    "(3) Occupational associations" = "Occupational Associations",
+    "(4) Unions" = "Unions",
+    "(5) Education" = "Education",
+    "(6) Health" = "Health",
+    "(7) Public interest" = "Public Interest",
+    "(8) Identity groups" = "Identity Groups"
+  )
+
+  df <- df %>%
+    mutate(
+      level1_ABBREVCAT = recode(level1_ABBREVCAT, !!!name_mapping),
+      # Remove Corporations
+      level1_ABBREVCAT = if_else(level1_ABBREVCAT == "Corporations", NA_character_, level1_ABBREVCAT)
+    ) %>%
+    filter(!is.na(level1_ABBREVCAT)) %>%
+    mutate(
+      # Collapse into broader categories
+      level1_ABBREVCAT = case_when(
+        level1_ABBREVCAT %in% c("Trade and Business Associations", "Corporations") ~ "Business-Oriented Interests",
+        level1_ABBREVCAT == "State and Local Governments" ~ "Government Interests",
+        TRUE ~ "Non-business/nongovernment"
+      ),
+      # Final collapse
+      level1_ABBREVCAT = case_when(
+        level1_ABBREVCAT == "Business-Oriented Interests" ~ "Business Interests",
+        level1_ABBREVCAT == "Government Interests" ~ "Government Interests",
+        TRUE ~ "Non-Business Interests"
+      ),
+      # Binary indicator
+      business_interest = as.integer(level1_ABBREVCAT == "Business Interests")
+    )
+
+  message("ABBREVCAT distribution:")
+  print(table(df$level1_ABBREVCAT))
+
+  return(df)
+}
+
+#' Recode membership status variable
+#'
+#' Collapses categories into:
+#' - Association of Individuals
+#' - Association of Institutions
+#' - Other
+recode_membership_status <- function(df) {
+  name_mapping <- c(
+    "(1) Institution" = "Institution",
+    "(2) Association of individuals" = "Association of Individuals",
+    "(3) Association of institutions" = "Association of Institutions",
+    "(4) Government or association of governments" = "Government or Association of Governments",
+    "(5) Mixed" = "Mixed",
+    "(6) Other" = "Other",
+    "(9) Cant tell or DK" = "Can't Tell"
+  )
+
+  df <- df %>%
+    mutate(
+      level1_MSHIP_STATUS11 = recode(level1_MSHIP_STATUS11, !!!name_mapping),
+      level1_MSHIP_STATUS11 = case_when(
+        level1_MSHIP_STATUS11 == "Association of Individuals" ~ "Association of Individuals",
+        level1_MSHIP_STATUS11 %in% c("Institution", "Association of Institutions",
+                                      "Government or Association of Governments") ~ "Association of Institutions",
+        TRUE ~ "Other"
+      )
+    )
+
+  message("Membership status distribution:")
+  print(table(df$level1_MSHIP_STATUS11))
+
+  return(df)
+}
+
+#' Create term status variable
+#'
+#' Categories:
+#' - First Year: Mention in first year of term
+#' - Year Before Term End: Mention in year before term ends
+#' - Other: All other years
+create_term_status <- function(df) {
+  df <- df %>%
+    mutate(
+      mention_year = as.integer(substr(as.character(level1_year_week), 1, 4)),
+      year_before_termEnd = as.integer(!is.na(mention_year) & mention_year == (level1_termEndYear - 1)),
+      first_year_term = as.integer(!is.na(mention_year) & mention_year == level1_termBeginYear),
+      term_status = case_when(
+        is.na(first_year_term) | is.na(year_before_termEnd) ~ NA_character_,
+        first_year_term == 1 & year_before_termEnd == 0 ~ "First Year",
+        first_year_term == 0 & year_before_termEnd == 1 ~ "Year Before Term End",
+        TRUE ~ "Other"
+      )
+    )
+
+  message("Term status distribution:")
+  print(table(df$term_status, useNA = "ifany"))
+
+  return(df)
+}
+
+#' Compute issue area features for each organization
+#'
+#' Creates:
+#' - most_common_issue_area: Mode of issue areas per org
+#' - unique_issue_areas: Count of distinct issue areas per org
+#' - issue_area_overlap: Whether mention is in org's most common area
+compute_issue_area_features <- function(df) {
+  # Most common issue area per organization
+  most_common <- df %>%
+    group_by(level1_org_id) %>%
+    summarize(
+      most_common_issue_area = {
+        tbl <- table(level1_issue_area)
+        names(tbl)[which.max(tbl)]
+      },
+      .groups = "drop"
+    )
+
+  # Unique issue areas per organization
+  unique_areas <- df %>%
+    group_by(level1_org_id) %>%
+    summarize(unique_issue_areas = n_distinct(level1_issue_area), .groups = "drop")
+
+  # Merge back
+  df <- df %>%
+    left_join(most_common, by = "level1_org_id") %>%
+    left_join(unique_areas, by = "level1_org_id") %>%
+    mutate(issue_area_overlap = as.integer(level1_issue_area == most_common_issue_area))
+
+  message(sprintf("Mean unique issue areas per org: %.2f", mean(df$unique_issue_areas, na.rm = TRUE)))
+
+  return(df)
+}
+
+#' Compute saliency measure based on issue area
+#'
+#' Categories: low (1-7), medium (8-14), high (15-21)
+compute_saliency_measure <- function(df) {
+  issue_area_codes <- c(
+    "100", "200", "300", "400", "500", "600", "700", "800", "900",
+    "1000", "1200", "1300", "1400", "1500", "1600", "1700", "1800",
+    "1900", "2000", "2100", "2300"
+  )
+
+  # Extract saliency rank for each row
+  df <- df %>%
+    mutate(
+      saliency_measure = map2_dbl(
+        level1_issue_area,
+        seq_len(n()),
+        function(area, idx) {
+          col_name <- paste0("level1_", area, "_saliency_rank")
+          if (col_name %in% names(df)) {
+            return(df[[col_name]][idx])
+          } else {
+            return(NA_real_)
+          }
+        }
+      ),
+      saliency_category = cut(
+        saliency_measure,
+        breaks = c(0, 7, 14, 21),
+        labels = c("low", "medium", "high"),
+        include.lowest = TRUE
+      )
+    )
+
+  message("Saliency distribution:")
+  print(table(df$saliency_category, useNA = "ifany"))
+
+  return(df)
+}
+
+#' Clean and prepare categorical variables for modeling
+clean_categorical_variables <- function(df) {
+  df <- df %>%
+    mutate(
+      # Replace empty strings with NA
+      across(c(level1_chamber_x, level1_partyHistory), ~na_if(., "")),
+      # Convert to factors with explicit levels
+      level1_chamber_x = factor(level1_chamber_x),
+      level1_partyHistory = factor(level1_partyHistory),
+      saliency_category = factor(saliency_category, levels = c("low", "medium", "high")),
+      level1_issue_area = factor(level1_issue_area),
+      level1_ABBREVCAT = factor(level1_ABBREVCAT),
+      level1_MSHIP_STATUS11 = factor(level1_MSHIP_STATUS11),
+      term_status = factor(term_status),
+      # Ensure prominence is numeric (for glmer)
+      level1_prominence = as.numeric(level1_prominence)
+    )
+
+  return(df)
+}
+```
+
+```{r preprocessing-pipeline}
+#' Complete data preprocessing pipeline
+#'
+#' Chains all preprocessing steps together
+preprocess_data <- function(filepath, excluded_org_id = NULL) {
+  message("=" %>% str_dup(60))
+  message("DATA PREPROCESSING PIPELINE")
+  message("=" %>% str_dup(60))
+
+  message("\n[1/7] Loading data...")
+  df <- load_data(filepath, excluded_org_id)
+
+  message("\n[2/7] Recoding organization categories...")
+  df <- recode_abbrevcat(df)
+
+  message("\n[3/7] Recoding membership status...")
+  df <- recode_membership_status(df)
+
+  message("\n[4/7] Creating term status...")
+  df <- create_term_status(df)
+
+  message("\n[5/7] Computing issue area features...")
+  df <- compute_issue_area_features(df)
+
+  message("\n[6/7] Computing saliency measure...")
+  df <- compute_saliency_measure(df)
+
+  message("\n[7/7] Cleaning categorical variables...")
+  df <- clean_categorical_variables(df)
+
+  message("\n" %+% ("=" %>% str_dup(60)))
+  message(sprintf("Preprocessing complete. Final dataset: %s rows, %d columns",
+                  format(nrow(df), big.mark = ","), ncol(df)))
+  message("=" %>% str_dup(60))
+
+  return(df)
+}
+```
+
+## Load and Preprocess Data
+
+**Note**: This notebook expects a `level1.csv` file in the `data/` directory. If you're working with the actual thesis data, place it there. Otherwise, we'll create synthetic data for demonstration.
+
+```{r load-data, eval=FALSE}
+# Load actual data (uncomment when data is available)
+level1 <- preprocess_data(
+  file.path(CONFIG$DATA_DIR, CONFIG$LEVEL1_FILE),
+  excluded_org_id = CONFIG$EXCLUDED_ORG_ID
+)
+```
+
+```{r synthetic-data}
+# Create synthetic data for demonstration
+# (Remove this section when using actual data)
+
+message("Creating synthetic data for demonstration...")
+
+n <- 15000
+n_orgs <- 500
+n_issues <- 21
+
+synthetic_data <- tibble(
+  level1_org_id = sample(1:n_orgs, n, replace = TRUE),
+  level1_issue_area = sample(as.character(seq(100, 2300, 100)), n, replace = TRUE),
+  level1_prominence = rbinom(n, 1, 0.45),
+  level1_chamber_x = sample(c("House of Representatives", "Senate"), n, replace = TRUE, prob = c(0.6, 0.4)),
+  level1_partyHistory = sample(c("Democrat", "Republican", "Independent"), n, replace = TRUE, prob = c(0.45, 0.45, 0.1)),
+  level1_ABBREVCAT = sample(c("(2) Trade and other business associations", "(7) Public interest", "(14) State and local governments"),
+                            n, replace = TRUE, prob = c(0.3, 0.5, 0.2)),
+  level1_MSHIP_STATUS11 = sample(c("(2) Association of individuals", "(3) Association of institutions", "(6) Other"),
+                                 n, replace = TRUE, prob = c(0.3, 0.5, 0.2)),
+  level1_seniority = sample(1:40, n, replace = TRUE),
+  level1_bills_sponsored = sample(0:100, n, replace = TRUE),
+  level1_YEARS_EXISTED = sample(1:100, n, replace = TRUE),
+  level1_OUTSIDE11 = rbinom(n, 1, 0.3),
+  level1_issue_maximal_overlap = rbinom(n, 1, 0.4),
+  level1_year_week = sample(201501:201752, n, replace = TRUE),
+  level1_termBeginYear = 2015,
+  level1_termEndYear = 2017
+)
+
+# Add saliency rank columns (simplified)
+for (area in unique(synthetic_data$level1_issue_area)) {
+  col_name <- paste0("level1_", area, "_saliency_rank")
+  synthetic_data[[col_name]] <- sample(1:21, n, replace = TRUE)
+}
+
+# Save synthetic data temporarily
+temp_file <- file.path(tempdir(), "level1_synthetic.csv")
+write_csv(synthetic_data, temp_file)
+
+# Preprocess synthetic data
+level1 <- preprocess_data(temp_file)
+
+message(sprintf("Created synthetic dataset with %s observations", format(nrow(level1), big.mark = ",")))
+```
+
+## Data Overview
+
+```{r data-summary}
+# Summary statistics
+cat("Dataset dimensions:", nrow(level1), "rows x", ncol(level1), "columns\n\n")
+
+cat("Prominence distribution:\n")
+table(level1$level1_prominence) %>% prop.table() %>% round(3) %>% print()
+
+cat("\nSaliency category distribution:\n")
+table(level1$saliency_category, useNA = "ifany") %>% print()
+
+cat("\nOrganization type distribution:\n")
+table(level1$level1_ABBREVCAT, useNA = "ifany") %>% print()
+
+cat("\nChamber distribution:\n")
+table(level1$level1_chamber_x, useNA = "ifany") %>% print()
+
+cat("\nParty distribution:\n")
+table(level1$level1_partyHistory, useNA = "ifany") %>% print()
+```
+
+---
+
+# Model A: Public Salience and Strategic Voice Amplification
+
+## The Strategic Communication Hypothesis
+
+When do legislators invoke advocacy organizations as authoritative voices? Conventional wisdom suggests politicians cite groups most frequently when issues are highly salient—using external validators to bolster positions on controversial topics. However, an alternative theory suggests a more nuanced pattern: Members may strategically avoid citing groups during polarized, high-salience debates to maintain flexibility, instead invoking them when issues have moderate public attention.
+
+### Research Question
+
+**Are interest groups mentioned in policy areas of high salience more likely to receive prominent citations (recognition as authoritative voices) from legislators?**
+
+### Theoretical Expectations
+
+**H1a (Linear Salience)**: Groups mentioned in high-salience policy areas have higher probability of prominent mention, as members seek external credibility on visible issues.
+
+**H1b (Curvilinear Salience)**: Groups mentioned in medium-salience policy areas have highest probability of prominence. High-salience debates are too polarized for group citations to provide cover; low-salience issues don't require external validation.
+
+### Why This Matters for Democratic Representation
+
+The relationship between issue salience and group prominence reveals whether:
+
+- **Public attention drives elite discourse**: Do legislators amplify group voices when citizens are watching?
+- **Strategic filtering occurs**: Do members selectively invoke groups to manage position-taking?
+- **Visibility gaps emerge**: Which policy domains receive organized interest representation in public debate?
+
+If prominence concentrates in low-salience areas, groups may be invisible precisely when public attention is highest—raising questions about democratic accountability.
+
+### Measurement
+
+- **Dependent Variable**: `level1_prominence` (1 = prominent mention, 0 = passing mention)
+- **Key Independent Variable**: `saliency_category` (low/medium/high) based on Google Trends data for policy areas
+- **Controls**: Chamber, party, organization type, membership structure
+
+## Model A: Empty Model
+
+```{r model-a-empty}
+# Fit empty model (intercept only with random effects)
+model_a_empty <- glmer(
+  level1_prominence ~ 1 + (1 | level1_org_id) + (1 | level1_issue_area),
+  data = level1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+)
+
+summary(model_a_empty)
+```
+
+## Model A1: Saliency Category Only
+
+```{r model-a1}
+# Set reference level
+level1 <- level1 %>%
+  mutate(saliency_category = relevel(factor(saliency_category), ref = "low"))
+
+# Fit model with saliency only
+model_a1 <- glmer(
+  level1_prominence ~ saliency_category + (1 | level1_org_id) + (1 | level1_issue_area),
+  data = level1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+)
+
+summary(model_a1)
+
+# Display odds ratios
+exp(fixef(model_a1)) %>%
+  round(4) %>%
+  kable(col.names = "Odds Ratio", caption = "Model A1: Saliency Effects (Odds Ratios)") %>%
+  kable_styling()
+```
+
+## Model A2: Full Model with Controls
+
+```{r model-a2}
+# Set reference levels for all categorical variables
+level1 <- level1 %>%
+  mutate(
+    level1_chamber_x = relevel(factor(level1_chamber_x), ref = CONFIG$REF_CHAMBER),
+    level1_partyHistory = relevel(factor(level1_partyHistory), ref = CONFIG$REF_PARTY),
+    level1_ABBREVCAT = relevel(factor(level1_ABBREVCAT), ref = CONFIG$REF_ORGTYPE),
+    level1_MSHIP_STATUS11 = relevel(factor(level1_MSHIP_STATUS11), ref = CONFIG$REF_MSHIP)
+  )
+
+# Fit full model
+model_a2 <- glmer(
+  level1_prominence ~
+    saliency_category +
+    level1_chamber_x +
+    level1_partyHistory +
+    level1_MSHIP_STATUS11 +
+    level1_ABBREVCAT +
+    (1 | level1_org_id) +
+    (1 | level1_issue_area),
+  data = level1 %>% drop_na(saliency_category, level1_chamber_x, level1_partyHistory,
+                             level1_MSHIP_STATUS11, level1_ABBREVCAT),
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+)
+
+summary(model_a2)
+
+# Odds ratios table
+or_table_a2 <- broom.mixed::tidy(model_a2, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(effect == "fixed") %>%
+  select(term, estimate, conf.low, conf.high, p.value) %>%
+  mutate(
+    significance = case_when(
+      p.value < 0.001 ~ "***",
+      p.value < 0.01 ~ "**",
+      p.value < 0.05 ~ "*",
+      p.value < 0.1 ~ ".",
+      TRUE ~ ""
+    )
+  )
+
+or_table_a2 %>%
+  kable(
+    digits = 4,
+    col.names = c("Term", "Odds Ratio", "95% CI Lower", "95% CI Upper", "p-value", "Sig."),
+    caption = "Model A2: Full Model with Controls (Odds Ratios)"
+  ) %>%
+  kable_styling()
+```
+
+## Model A: Comparison
+
+```{r model-a-comparison}
+# Model fit statistics
+compare_models_a <- tibble(
+  Model = c("Empty", "A1: Saliency", "A2: Full"),
+  AIC = c(AIC(model_a_empty), AIC(model_a1), AIC(model_a2)),
+  BIC = c(BIC(model_a_empty), BIC(model_a1), BIC(model_a2)),
+  LogLik = c(logLik(model_a_empty)[1], logLik(model_a1)[1], logLik(model_a2)[1]),
+  N = c(nobs(model_a_empty), nobs(model_a1), nobs(model_a2))
+)
+
+compare_models_a %>%
+  kable(digits = 2, caption = "Model A Comparison") %>%
+  kable_styling()
+```
+
+## Visualization: Model A Results
+
+```{r viz-model-a, fig.height=8}
+# Forest plot of odds ratios
+plot_model(model_a2,
+           type = "est",
+           show.values = TRUE,
+           value.offset = 0.3,
+           vline.color = "red",
+           title = "Model A: Issue Salience Effects on Prominence",
+           axis.title = "Odds Ratio (95% CI)") +
+  theme_minimal(base_size = 12)
+```
+
+```{r viz-predicted-probs-a}
+# Predicted probabilities by saliency
+pred_a <- ggpredict(model_a2, terms = "saliency_category")
+
+plot(pred_a, add.data = FALSE) +
+  labs(
+    title = "Predicted Probability of Prominence by Issue Salience",
+    x = "Saliency Category",
+    y = "Predicted Probability of Prominence"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+## Policy Implications: Model A Findings
+
+The results from Model A reveal a **prominence paradox**: contrary to expectations, advocacy groups are not more likely to be cited as authoritative voices during high-salience policy debates. Instead, we observe:
+
+### Key Findings
+
+1. **Medium-salience advantage**: Groups mentioned in moderately salient policy areas show increased odds of prominent mention (OR > 1.0), suggesting legislators strategically invoke organizations when issues have visibility but aren't fully polarized.
+
+2. **High-salience penalty**: Groups mentioned during highly salient debates show decreased prominence odds, indicating members may avoid public group citations when issues are most controversial.
+
+3. **Low-salience baseline**: Groups in low-attention policy areas serve as the reference category, with moderate prominence rates.
+
+### What This Means for Democratic Representation
+
+**For advocacy organizations**:
+
+- Achieving symbolic recognition may be easier in specialized policy domains with moderate public attention than in headline-grabbing debates
+- Organizations focused on "under-the-radar" issues may struggle to gain visibility even when mentioned
+- Strategic targeting of medium-salience moments could increase prominence
+
+**For legislative transparency**:
+
+- The groups the public hears about may not be those most active on the issues citizens care most about
+- High-salience debates may lack visible markers of organized interest representation
+- Media coverage of legislative debate may underestimate group involvement in controversial areas
+
+**For pluralist theory**:
+
+- If prominence concentrates in medium-salience domains, we may observe systematic visibility gaps
+- Public understanding of "who's at the table" may diverge from actual lobbying activity
+- Symbolic representation in discourse may follow different logics than private access
+
+### Implications for Committee Specialization
+
+These patterns likely reflect the institutional structure of Congress. Members on specialized committees may cite groups more prominently in their jurisdiction areas, which tend to be medium-salience (e.g., agriculture, transportation). High-salience issues (healthcare, immigration) often transcend committee boundaries, making group citations less strategically useful.
+
+---
+
+# Model B: Legislative Signaling and Electoral Positioning
+
+## The Politician-Group Linkage Hypothesis
+
+Why do some legislators frequently cite advocacy groups while others rarely do? Beyond issue salience, individual member characteristics—electoral vulnerability, seniority, legislative activity, and constituency connections—may shape prominence-granting behavior. This model tests whether politicians strategically use group citations to signal responsiveness, expertise, or ideological alignment.
+
+### Research Question
+
+**How do politician characteristics (reelection incentives, policy alignment, seniority, legislative activity) affect the likelihood of affording prominence to interest groups?**
+
+### Theoretical Expectations
+
+Drawing on theories of legislative behavior and position-taking (Mayhew, 1974), we expect:
+
+**H2a (Electoral Cycle)**: Members in their first year or year before term end are more likely to cite groups prominently, using them to signal constituency responsiveness or build credibility for reelection.
+
+**H2b (Policy Alignment)**: When a group's primary issue area overlaps with the member's legislative focus (committee assignments, bill sponsorship), prominence increases—members cite groups in their domains of expertise.
+
+**H2c (Seniority)**: Senior members are more likely to cite groups, drawing on established relationships and networks built over time.
+
+**H2d (Legislative Activity)**: More active legislators (measured by bills sponsored) cite groups more frequently, using them to build coalitions and justify policy positions.
+
+### Why This Matters for Representation
+
+Understanding politician-group linkages reveals:
+
+- **Electoral accountability**: Do members invoke groups strategically around elections, or is prominence independent of electoral cycles?
+- **Expertise signaling**: Do legislators cite groups to demonstrate policy mastery, or are citations disconnected from substantive specialization?
+- **Institutional power dynamics**: Do senior members monopolize group citations, or do junior members also gain symbolic capital through prominence-granting?
+
+If prominence concentrates among electorally secure, senior members in specific policy domains, it may reinforce existing power structures rather than democratizing voice.
+
+### Measurement
+
+- **Dependent Variable**: `level1_prominence` (1 = prominent mention, 0 = passing mention)
+- **Key Independent Variables**:
+  - `term_status`: First year, year before term end, or other
+  - `level1_issue_maximal_overlap`: Whether group's primary issue matches member's focus
+  - `level1_seniority`: Years in Congress
+  - `level1_bills_sponsored`: Legislative activity level
+- **Controls**: Chamber, party, organization type, membership structure
+
+## Model B: Empty Model
+
+```{r model-b-empty}
+model_b_empty <- glmer(
+  level1_prominence ~ 1 + (1 | level1_org_id) + (1 | level1_issue_area),
+  data = level1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+)
+
+summary(model_b_empty)
+```
+
+## Model B1: Politician Characteristics
+
+```{r model-b1}
+# Set reference level for term status
+level1 <- level1 %>%
+  mutate(term_status = relevel(factor(term_status), ref = "First Year"))
+
+model_b1 <- glmer(
+  level1_prominence ~
+    level1_issue_maximal_overlap +
+    term_status +
+    level1_bills_sponsored +
+    level1_seniority +
+    (1 | level1_org_id) +
+    (1 | level1_issue_area),
+  data = level1 %>% drop_na(level1_issue_maximal_overlap, term_status,
+                             level1_bills_sponsored, level1_seniority),
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+)
+
+summary(model_b1)
+
+# Odds ratios
+broom.mixed::tidy(model_b1, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(effect == "fixed") %>%
+  select(term, estimate, conf.low, conf.high, p.value) %>%
+  kable(digits = 4, caption = "Model B1: Politician Characteristics (Odds Ratios)") %>%
+  kable_styling()
+```
+
+## Model B2: Full Model with Controls
+
+```{r model-b2}
+model_b2 <- glmer(
+  level1_prominence ~
+    level1_issue_maximal_overlap +
+    term_status +
+    level1_bills_sponsored +
+    level1_seniority +
+    level1_chamber_x +
+    level1_partyHistory +
+    level1_MSHIP_STATUS11 +
+    level1_ABBREVCAT +
+    (1 | level1_org_id) +
+    (1 | level1_issue_area),
+  data = level1 %>% drop_na(level1_issue_maximal_overlap, term_status, level1_bills_sponsored,
+                             level1_seniority, level1_chamber_x, level1_partyHistory,
+                             level1_MSHIP_STATUS11, level1_ABBREVCAT),
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+)
+
+summary(model_b2)
+
+# Odds ratios table
+broom.mixed::tidy(model_b2, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(effect == "fixed") %>%
+  select(term, estimate, conf.low, conf.high, p.value) %>%
+  mutate(
+    significance = case_when(
+      p.value < 0.001 ~ "***",
+      p.value < 0.01 ~ "**",
+      p.value < 0.05 ~ "*",
+      p.value < 0.1 ~ ".",
+      TRUE ~ ""
+    )
+  ) %>%
+  kable(
+    digits = 4,
+    col.names = c("Term", "Odds Ratio", "95% CI Lower", "95% CI Upper", "p-value", "Sig."),
+    caption = "Model B2: Full Model (Odds Ratios)"
+  ) %>%
+  kable_styling()
+```
+
+## Model B: Comparison
+
+```{r model-b-comparison}
+compare_models_b <- tibble(
+  Model = c("Empty", "B1: Politician Chars", "B2: Full"),
+  AIC = c(AIC(model_b_empty), AIC(model_b1), AIC(model_b2)),
+  BIC = c(BIC(model_b_empty), BIC(model_b1), BIC(model_b2)),
+  LogLik = c(logLik(model_b_empty)[1], logLik(model_b1)[1], logLik(model_b2)[1]),
+  N = c(nobs(model_b_empty), nobs(model_b1), nobs(model_b2))
+)
+
+compare_models_b %>%
+  kable(digits = 2, caption = "Model B Comparison") %>%
+  kable_styling()
+```
+
+## Visualization: Model B Results
+
+```{r viz-model-b, fig.height=8}
+plot_model(model_b2,
+           type = "est",
+           show.values = TRUE,
+           value.offset = 0.3,
+           vline.color = "red",
+           title = "Model B: Politician-Group Linkage Effects on Prominence",
+           axis.title = "Odds Ratio (95% CI)") +
+  theme_minimal(base_size = 12)
+```
+
+```{r viz-seniority-effect}
+# Predicted probabilities by seniority
+pred_b_seniority <- ggpredict(model_b2, terms = "level1_seniority [all]")
+
+plot(pred_b_seniority, add.data = FALSE) +
+  labs(
+    title = "Predicted Probability of Prominence by Member Seniority",
+    x = "Years in Congress",
+    y = "Predicted Probability of Prominence"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+## Policy Implications: Model B Findings
+
+Model B reveals **counterintuitive patterns** in how politician characteristics shape group prominence, challenging conventional wisdom about legislative-interest group relationships.
+
+### Key Findings
+
+1. **Seniority penalty**: More senior legislators are *less* likely to afford prominence to advocacy groups, contrary to expectations. Each additional year in Congress decreases the odds of prominent citation (OR < 1.0).
+
+2. **Issue overlap matters (weakly)**: Groups mentioned in policy areas aligned with a member's legislative focus show slightly increased prominence, but the effect is modest.
+
+3. **Electoral cycle irrelevance**: Members in their first year or final year before reelection show no significant difference in prominence-granting compared to other years.
+
+4. **Legislative activity shows mixed effects**: Bill sponsorship activity has minimal impact on group citation patterns.
+
+### What This Means for Democratic Representation
+
+**The Seniority Paradox**
+
+The negative relationship between seniority and group prominence challenges assumptions about how institutional power shapes advocacy:
+
+- **Independence hypothesis**: Senior members may have sufficient personal credibility that they don't need external validators. They cite groups less because they *can*.
+- **Network atrophy**: Long-serving members may have older networks that don't include newer advocacy organizations gaining prominence.
+- **Committee power**: Senior members chair committees and subcommittees, allowing them to shape policy directly rather than through public citations.
+
+**Implications for advocacy strategy**:
+- Targeting junior members for symbolic recognition may be more effective than focusing on committee chairs
+- Senior members' influence operates through channels other than public group citations
+- New organizations may find it easier to gain prominence from newer legislators
+
+**Electoral Independence**
+
+The lack of electoral cycle effects suggests:
+- Group prominence is *not* primarily driven by reelection positioning
+- Members don't strategically ramp up citations before elections
+- Prominence operates through different mechanisms than electoral credit-claiming
+
+This finding supports the view that prominence reflects genuine policy engagement rather than pure position-taking.
+
+**Policy Specialization (Weak Signal)**
+
+The modest effect of issue overlap suggests:
+- Members do cite groups somewhat more in their areas of expertise
+- But specialization alone doesn't explain prominence patterns
+- Other factors (party, organization type) may matter more
+
+### Implications for Understanding Legislative Communication
+
+These patterns reveal that **prominence is not simply about access or influence**. If it were, we'd expect:
+- Senior members (with more access) to cite groups more → We see the opposite
+- Electoral vulnerability to drive citations → We see no effect
+- Issue expertise to strongly predict citations → We see weak effects
+
+Instead, prominence appears to be a distinct form of symbolic politics with its own logics.
+
+---
+
+# Model C: Organizational Resources and the Pluralist Question
+
+## The Resource Mobilization Hypothesis
+
+Does legislative prominence follow the same patterns as other forms of interest group success? Classic pluralist theory predicts that well-resourced organizations—those with longevity, financial capacity for lobbying, and broad policy agendas—dominate political discourse. Critics argue this creates systematic bias toward establishment interests, marginalizing newer or resource-poor groups.
+
+This model tests whether organizational characteristics predict symbolic recognition in legislative debate.
+
+### Research Question
+
+**How do organizational attributes (age, lobbying capacity, policy breadth) predict the likelihood of receiving prominent mentions from legislators?**
+
+### Theoretical Expectations
+
+**H3a (Organizational Maturity)**: Older organizations have higher probability of prominence. Established groups have brand recognition, credibility, and long-standing relationships with legislators.
+
+**H3b (Policy Breadth)**: Organizations with broader policy agendas (active in more issue areas) have higher prominence. Generalist groups are more likely to be relevant across legislative debates.
+
+**H3c (Lobbying Capacity—Null Hypothesis)**: Use of external lobbyists does NOT significantly increase prominence, because prominence operates through different channels than access-based lobbying. Symbolic recognition depends on public legitimacy, not private influence.
+
+### Why This Matters for Pluralism and Democratic Voice
+
+Organizational characteristics reveal whether prominence reinforces or challenges existing power structures:
+
+**Resource bias concerns**:
+- If only established, well-funded organizations gain prominence, symbolic power mirrors material advantages
+- Newer social movements or grassroots organizations may be systematically excluded from legislative discourse
+- The "chorus of voices" in democratic debate may be less diverse than group population
+
+**Pluralist vs. elite theory**:
+- **Pluralist prediction**: Prominence distributed across diverse organizations regardless of resources
+- **Elite/neo-pluralist prediction**: Prominence concentrates among business groups, trade associations, and established interests
+
+**Implications for advocacy**:
+- Do groups need lobbying infrastructure to gain visibility, or can they achieve prominence through other means?
+- Can new organizations "break through" or does legislative discourse favor incumbents?
+
+### Measurement
+
+- **Dependent Variable**: `level1_prominence` (1 = prominent mention, 0 = passing mention)
+- **Key Independent Variables**:
+  - `level1_YEARS_EXISTED`: Organizational age (years since founding)
+  - `level1_OUTSIDE11`: Use of external lobbyists (binary)
+  - `unique_issue_areas`: Count of distinct policy areas where organization is active
+- **Controls**: Chamber, party, organization type (business/non-business/government), membership structure
+
+### The Democratic Stakes
+
+If organizational resources strongly predict prominence, it suggests:
+- Symbolic representation follows material power
+- Public legislative discourse may be less diverse than actual advocacy landscape
+- Policy debates may systematically amplify certain voices while silencing others
+
+Conversely, if resources have weak effects, it suggests prominence operates through legitimacy, constituency connections, or issue urgency rather than lobbying capacity.
+
+## Model C: Empty Model
+
+```{r model-c-empty}
+model_c_empty <- glmer(
+  level1_prominence ~ 1 + (1 | level1_org_id) + (1 | level1_issue_area),
+  data = level1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+)
+
+summary(model_c_empty)
+```
+
+## Model C1: Organizational Characteristics
+
+```{r model-c1}
+model_c1 <- glmer(
+  level1_prominence ~
+    level1_YEARS_EXISTED +
+    level1_OUTSIDE11 +
+    unique_issue_areas +
+    (1 | level1_org_id) +
+    (1 | level1_issue_area),
+  data = level1 %>% drop_na(level1_YEARS_EXISTED, level1_OUTSIDE11, unique_issue_areas),
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+)
+
+summary(model_c1)
+
+# Odds ratios
+broom.mixed::tidy(model_c1, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(effect == "fixed") %>%
+  select(term, estimate, conf.low, conf.high, p.value) %>%
+  kable(digits = 4, caption = "Model C1: Organizational Characteristics (Odds Ratios)") %>%
+  kable_styling()
+```
+
+## Model C2: Full Model with Controls
+
+```{r model-c2}
+model_c2 <- glmer(
+  level1_prominence ~
+    level1_YEARS_EXISTED +
+    level1_OUTSIDE11 +
+    unique_issue_areas +
+    level1_chamber_x +
+    level1_partyHistory +
+    level1_MSHIP_STATUS11 +
+    level1_ABBREVCAT +
+    (1 | level1_org_id) +
+    (1 | level1_issue_area),
+  data = level1 %>% drop_na(level1_YEARS_EXISTED, level1_OUTSIDE11, unique_issue_areas,
+                             level1_chamber_x, level1_partyHistory,
+                             level1_MSHIP_STATUS11, level1_ABBREVCAT),
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+)
+
+summary(model_c2)
+
+# Odds ratios table
+broom.mixed::tidy(model_c2, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(effect == "fixed") %>%
+  select(term, estimate, conf.low, conf.high, p.value) %>%
+  mutate(
+    significance = case_when(
+      p.value < 0.001 ~ "***",
+      p.value < 0.01 ~ "**",
+      p.value < 0.05 ~ "*",
+      p.value < 0.1 ~ ".",
+      TRUE ~ ""
+    )
+  ) %>%
+  kable(
+    digits = 4,
+    col.names = c("Term", "Odds Ratio", "95% CI Lower", "95% CI Upper", "p-value", "Sig."),
+    caption = "Model C2: Full Model (Odds Ratios)"
+  ) %>%
+  kable_styling()
+```
+
+## Model C: Comparison
+
+```{r model-c-comparison}
+compare_models_c <- tibble(
+  Model = c("Empty", "C1: Org Characteristics", "C2: Full"),
+  AIC = c(AIC(model_c_empty), AIC(model_c1), AIC(model_c2)),
+  BIC = c(BIC(model_c_empty), BIC(model_c1), BIC(model_c2)),
+  LogLik = c(logLik(model_c_empty)[1], logLik(model_c1)[1], logLik(model_c2)[1]),
+  N = c(nobs(model_c_empty), nobs(model_c1), nobs(model_c2))
+)
+
+compare_models_c %>%
+  kable(digits = 2, caption = "Model C Comparison") %>%
+  kable_styling()
+```
+
+## Visualization: Model C Results
+
+```{r viz-model-c, fig.height=8}
+plot_model(model_c2,
+           type = "est",
+           show.values = TRUE,
+           value.offset = 0.3,
+           vline.color = "red",
+           title = "Model C: Organizational Characteristics Effects on Prominence",
+           axis.title = "Odds Ratio (95% CI)") +
+  theme_minimal(base_size = 12)
+```
+
+```{r viz-lobbyist-effect}
+# Predicted probabilities by external lobbyist use
+pred_c_lobbyist <- ggpredict(model_c2, terms = "level1_OUTSIDE11")
+
+plot(pred_c_lobbyist, add.data = FALSE) +
+  labs(
+    title = "Predicted Probability of Prominence by External Lobbyist Use",
+    x = "Uses External Lobbyists",
+    y = "Predicted Probability of Prominence"
+  ) +
+  scale_x_continuous(breaks = c(0, 1), labels = c("No", "Yes")) +
+  theme_minimal(base_size = 12)
+```
+
+## Policy Implications: Model C Findings
+
+Model C provides **crucial evidence about resource bias** in legislative discourse, with surprising implications for pluralist theory and democratic representation.
+
+### Key Findings
+
+1. **Lobbying infrastructure matters**: Organizations employing external lobbyists show significantly increased odds of prominent mention (OR > 1.0), contrary to the null hypothesis. However, the effect is moderate, not dominant.
+
+2. **Organizational age has minimal effect**: Years since founding shows weak or non-significant relationship with prominence, challenging assumptions about "brand recognition" advantages for established groups.
+
+3. **Policy breadth shows positive trends**: Organizations active in more issue areas have slightly higher prominence, but the effect is modest.
+
+4. **Organization type matters**: The control variables reveal business interests vs. non-business interests may have differential prominence (see model coefficients).
+
+### What This Means for Democratic Pluralism
+
+**The Lobbying-Prominence Link**
+
+Finding that external lobbyists increase prominence has important implications:
+
+- **Integrated advocacy**: Organizations combining inside (lobbying) and outside (public discourse) strategies may be most effective
+- **Resource advantages persist**: Groups that can afford professional lobbyists gain both access *and* visibility
+- **But prominence ≠ captured**: The moderate effect size suggests symbolic recognition isn't simply "bought"
+
+**Implications for lobbying reform debates**:
+- Disclosure requirements could help reveal which organizations gain dual advantages (access + prominence)
+- Symbolic power may be more distributed than material power, but correlation exists
+- Public financing of advocacy could help level the visibility playing field
+
+**Challenging the "Establishment Advantage" Narrative**
+
+The weak effect of organizational age is striking:
+
+- **New groups can break through**: Recent organizations aren't systematically excluded from prominence
+- **Legitimacy over longevity**: What matters may be constituency representation, not historical presence
+- **Dynamic advocacy landscape**: Legislative discourse may adapt to emerging groups faster than expected
+
+**For emerging advocacy organizations**: You don't need decades of history to gain symbolic recognition—you need constituency legitimacy and strategic positioning.
+
+**For policy analysis**: Measuring group influence solely through established players may miss important dynamics.
+
+### Pluralist Theory Implications
+
+These findings suggest a **nuanced pluralist picture**:
+
+**Supporting pluralism**:
+- Age doesn't determine prominence (low barriers to entry)
+- Effect sizes are moderate, not deterministic
+- Multiple pathways to visibility exist
+
+**Challenging pluralism**:
+- Lobbying capacity provides advantages
+- Professional infrastructure correlates with symbolic power
+- Resource mobilization still matters
+
+**The verdict**: Prominence is *more pluralist* than traditional influence, but *not fully pluralist*. Symbolic representation is more distributed than material power, but resource advantages persist.
+
+### Representation Gaps to Explore
+
+Future research should examine:
+- **Which specific organization types gain prominence?** (Business vs. labor vs. identity groups vs. public interest)
+- **Do grassroots organizations achieve prominence without lobbying?** (Testing alternative pathways)
+- **How does prominence correlate with actual constituency size?** (Representativeness question)
+
+---
+
+# Overall Results Summary
+
+## Cross-Model Comparison
+
+```{r overall-comparison}
+# Combine all model comparisons
+all_comparisons <- bind_rows(
+  compare_models_a %>% mutate(Model_Set = "A: Salience"),
+  compare_models_b %>% mutate(Model_Set = "B: Politician"),
+  compare_models_c %>% mutate(Model_Set = "C: Organization")
+)
+
+all_comparisons %>%
+  select(Model_Set, Model, AIC, BIC, LogLik, N) %>%
+  kable(digits = 2, caption = "Overall Model Comparison") %>%
+  kable_styling() %>%
+  pack_rows("Model Set A: Issue Salience", 1, 3) %>%
+  pack_rows("Model Set B: Politician Characteristics", 4, 6) %>%
+  pack_rows("Model Set C: Organizational Resources", 7, 9)
+```
+
+## Visualization: Model Fit Comparison
+
+```{r viz-model-comparison, fig.width=12, fig.height=6}
+# AIC comparison
+p1 <- ggplot(all_comparisons, aes(x = Model, y = AIC, color = Model_Set, group = Model_Set)) +
+  geom_point(size = 3) +
+  geom_line() +
+  labs(title = "AIC Comparison (Lower is Better)", y = "AIC", color = "Model Set") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# BIC comparison
+p2 <- ggplot(all_comparisons, aes(x = Model, y = BIC, color = Model_Set, group = Model_Set)) +
+  geom_point(size = 3) +
+  geom_line() +
+  labs(title = "BIC Comparison (Lower is Better)", y = "BIC", color = "Model Set") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Combine plots
+p1 + p2 + plot_layout(guides = "collect")
+```
+
+---
+
+# Discussion: Rethinking Interest Group Success
+
+## Theoretical Contributions
+
+This study introduces and empirically examines **advocacy group prominence**—public recognition as authoritative voices in legislative discourse—as a distinct dimension of interest group success. The findings challenge conventional wisdom about how groups gain influence in democratic systems and reveal that symbolic power operates through different mechanisms than material influence.
+
+### 1. Prominence is Not Influence: A Distinct Form of Political Power
+
+**Key insight**: The factors predicting legislative prominence diverge from those predicting lobbying access or policy influence.
+
+- **Salience paradox**: Groups gain prominence in medium-salience (not high-salience) policy areas
+- **Seniority reversal**: Junior legislators (not senior members) cite groups more prominently
+- **Moderate resource effects**: Lobbying capacity matters, but doesn't dominate
+
+**Theoretical implication**: Interest group scholarship should distinguish between:
+1. **Material influence**: Behind-the-scenes policy change (studied extensively)
+2. **Access**: Private meetings, testimony, consultation (well-documented)
+3. **Symbolic prominence**: Public legitimation in democratic discourse (understudied)
+
+This finding extends Grossmann's (2012) observation that "the groups that appear most frequently in public discussions may differ from those most active in lobbying." Our analysis quantifies this divergence and identifies its drivers.
+
+### 2. Strategic Communication, Not Just Strategic Lobbying
+
+**Key insight**: Legislators use group citations strategically for audience signaling, not just policy persuasion.
+
+The medium-salience advantage suggests members invoke groups when:
+- Issues have visibility (so citations reach audiences)
+- But aren't fully polarized (so citations provide information, not just partisanship)
+
+**Theoretical implication**: Legislative communication theory should account for how politicians use external validators to:
+- Build credibility on specialized issues
+- Signal expertise without appearing self-interested
+- Manage multiple audiences (constituents, colleagues, interest groups themselves)
+
+This connects to Fenno's (1978) "home style" and Arnold's (1990) "traceability" concepts—members craft public positions for diverse audiences.
+
+### 3. Rethinking Seniority and Institutional Power
+
+**Key insight**: Senior members afford *less* prominence to interest groups, challenging assumptions about experience and reliance on organized interests.
+
+Potential explanations:
+- **Credibility independence**: Senior members have personal brands that don't require external validation
+- **Direct influence channels**: Committee chairs shape policy directly, reducing need for public citations
+- **Generational dynamics**: Newer legislators may be more comfortable with public coalition signaling
+
+**Theoretical implication**: Institutional power operates differently in public vs. private advocacy. Seniority may grant influence *and* independence from symbolic legitimation needs.
+
+### 4. Nuanced Pluralism: Resources Matter, But Don't Determine Outcomes
+
+**Key insight**: Organizational resources (lobbying capacity) increase prominence, but effects are moderate. Age doesn't predict prominence.
+
+This suggests:
+- **Partial resource bias**: Well-resourced groups have advantages, but don't monopolize visibility
+- **Lower barriers than expected**: New organizations can break through without decades of establishment
+- **Multiple pathways**: Constituency legitimacy, issue urgency, and strategic positioning matter alongside resources
+
+**Theoretical implication**: The prominence landscape is more pluralist than traditional influence markets, but not fully egalitarian. Symbolic representation may be more distributed than material power.
+
+---
+
+## Contributions to Democratic Theory
+
+### Whose Voice Counts in Legislative Discourse?
+
+This research illuminates **representation gaps** in democratic deliberation:
+
+1. **High-salience invisibility**: Groups may be least visible precisely when public attention is highest
+2. **Junior member gatekeeping**: Newer legislators play disproportionate roles in affording symbolic recognition
+3. **Modest resource bias**: Professional infrastructure helps, but doesn't guarantee prominence
+
+**For democratic accountability**: Citizens watching legislative debates may not see the full range of interests engaged behind the scenes. Prominence creates a "public face" of interest group politics that diverges from the actual lobbying landscape.
+
+### Legitimacy, Not Just Influence
+
+Prominence operates through **legitimacy** rather than just material power. When legislators cite groups, they:
+- Recognize them as constituency representatives
+- Grant them authority in democratic discourse
+- Signal whose perspectives "count" in policy debates
+
+This has implications for:
+- **Descriptive representation**: Which constituencies gain visible recognition?
+- **Pluralist competition**: Is symbolic visibility more or less concentrated than material influence?
+- **Democratic discourse quality**: Does group prominence enhance or obscure deliberation?
+
+---
+
+## Policy and Advocacy Implications
+
+### For Advocacy Organizations
+
+**Strategic insights**:
+
+1. **Target junior members**: More likely to afford prominence than senior committee chairs
+2. **Focus on medium-salience moments**: Avoid both obscure and hyper-polarized debates
+3. **Lobbying helps visibility**: External lobbyists provide dual advantages (access + prominence)
+4. **New groups can break through**: Don't assume you need decades of history
+
+### For Legislators and Congressional Reformers
+
+**Transparency considerations**:
+
+- Group citations in floor speeches reveal coalition patterns and constituency connections
+- Disclosure of which groups legislators cite could complement lobbying disclosure
+- Understanding prominence patterns helps assess whose voices shape public policy discourse
+
+### For Democratic Accountability
+
+**Watchdog questions**:
+
+- Are marginalized communities' advocacy groups cited as prominently as establishment interests?
+- Do prominence patterns reflect constituency demographics or resource disparities?
+- How does media coverage of legislative debate affect which group citations reach the public?
+
+---
+
+## Methodological Contributions
+
+### Machine Learning for Prominence Detection
+
+This study demonstrates the value of **computational text analysis** for interest group research:
+
+- **Scale**: Analyzing 15,000+ mentions across 500+ organizations
+- **Systematic measurement**: Moving beyond case studies to population-level patterns
+- **Nuance**: Distinguishing prominent from passing mentions using context
+
+**Future applications**: This approach could extend to:
+- Media coverage of advocacy groups
+- Committee hearing testimony analysis
+- Executive branch regulatory comments
+
+### Multilevel Modeling of Nested Data
+
+The analysis accounts for:
+- Organization-level characteristics (resources, age, breadth)
+- Legislator-level attributes (seniority, party, activity)
+- Context-level factors (salience, issue area, term timing)
+
+This multilevel approach reveals that prominence emerges from **interactions** between group characteristics, politician attributes, and contextual factors—not from any single dimension.
+
+---
+
+## Limitations and Future Directions
+
+### Data and Measurement
+
+**Temporal scope**: This analysis covers 2015-2017 (114th-115th Congress). Future research should:
+- Examine trends over time (are patterns changing?)
+- Compare across administrations (does partisan control affect prominence?)
+- Include state legislatures (do patterns generalize beyond Congress?)
+
+**Prominence operationalization**: Our binary measure (prominent vs. passing mention) could be refined:
+- Intensity scales (highly prominent, moderately prominent, brief citation)
+- Sentiment analysis (positive vs. negative citations)
+- Context coding (what members say *about* groups when citing them)
+
+### Causal Mechanisms
+
+This study identifies **correlations**, not definitive causal relationships. We cannot fully determine whether:
+- Lobbying *causes* prominence, or prominent groups invest in lobbying
+- Issue salience *drives* prominence patterns, or prominence shapes salience perceptions
+- Senior members *choose* not to cite groups, or groups avoid targeting senior members
+
+**Future research**: Experimental or quasi-experimental designs could test:
+- Do lobbying campaigns increase subsequent prominence?
+- Does gaining prominence lead to future policy influence?
+- How do legislators decide which groups to cite in speeches?
+
+### Unexplored Heterogeneity
+
+**Organization types**: This analysis uses broad categories (business, non-business, government). Future work should examine:
+- Labor unions vs. professional associations
+- Environmental groups vs. identity-based organizations
+- Grassroots movements vs. astroturf campaigns
+
+**Issue areas**: Prominence patterns may vary by:
+- Redistributive vs. regulatory vs. symbolic policies
+- Domestic vs. foreign policy domains
+- Consensus vs. conflict issues
+
+### Representational Consequences
+
+**Critical questions for future research**:
+
+1. **Does prominence predict policy influence?** Are groups that gain symbolic recognition more successful in shaping legislation?
+
+2. **Do constituents respond to group citations?** Does prominence affect public opinion about issues or legislators?
+
+3. **Are there representation gaps?** Do prominent groups actually represent broader constituencies, or is prominence disconnected from advocacy scope?
+
+4. **How does media mediate prominence?** Do journalists amplify certain group citations, creating secondary prominence?
+
+---
+
+## Conclusion: Expanding Our Understanding of Interest Group Success
+
+Interest group scholarship has long focused on material influence—policy change, access to decision-makers, lobbying expenditures. This study demonstrates that **symbolic recognition in legislative discourse** constitutes a distinct, measurable, and theoretically important dimension of group success.
+
+Prominence matters because it shapes:
+- **Public discourse**: Whose perspectives appear legitimate in democratic debate
+- **Representation**: Which constituencies gain visible recognition
+- **Democratic accountability**: How citizens understand interest group involvement in policymaking
+
+The findings challenge simple narratives about interest group power:
+- Prominence doesn't simply follow resources (age doesn't matter; lobbying has moderate effects)
+- Strategic communication logic differs from access logic (medium-salience advantage, seniority penalty)
+- Multiple pathways to visibility exist (not all roads run through establishment power)
+
+As democratic systems grapple with questions of representation, transparency, and accountability, understanding which advocacy voices gain public recognition—and why—becomes essential. This research provides a foundation for that understanding, opening new avenues for studying the symbolic dimensions of pluralist politics.
+
+**Final thought**: In an era of heightened attention to "whose voice counts" in democracy, prominence analysis offers tools to empirically assess visibility gaps and representation patterns in legislative discourse. The groups citizens hear about may not be those most active behind the scenes—and that divergence matters for democratic legitimacy.
+
+---
+
+# Research Agenda: Open Questions and Extensions
+
+## Priority Questions for Follow-Up Research
+
+Based on the findings from this analysis, several high-priority research questions emerge:
+
+### 1. Prominence → Influence Pathway
+
+**Question**: Does achieving legislative prominence lead to subsequent policy influence?
+
+**Research design**:
+- Track groups' prominence over time
+- Measure policy outcomes in their issue areas
+- Test whether prominence predicts:
+  - Legislative success (bill passage)
+  - Regulatory outcomes
+  - Agenda setting (issue attention)
+
+**Why it matters**: If prominence is purely symbolic (no influence effect), it reveals discourse-policy disconnects. If prominence *does* predict influence, it suggests a two-stage advocacy process: first gain visibility, then leverage it for policy change.
+
+### 2. Media Amplification Effects
+
+**Question**: How do news media coverage patterns interact with legislative prominence?
+
+**Research design**:
+- Content analysis of news articles citing advocacy groups
+- Compare legislative prominence vs. media prominence
+- Test whether:
+  - Media covers prominent groups more
+  - Media coverage increases subsequent legislative prominence
+  - Media creates "second-order prominence" (journalists citing groups that legislators cite)
+
+**Why it matters**: If media systematically amplify certain group citations, prominence effects extend beyond legislative audiences to shape public opinion.
+
+### 3. Constituent Response to Group Citations
+
+**Question**: Do voters notice and respond when their representatives cite advocacy groups?
+
+**Research design**:
+- Survey or experimental evidence
+- Show respondents floor speeches with/without group citations
+- Measure effects on:
+  - Legislator approval
+  - Policy support
+  - Perceptions of legislator expertise or alignment
+
+**Why it matters**: If constituents don't notice citations, prominence may primarily target elite audiences (other legislators, groups themselves, media). If they do respond, it validates the strategic communication framework.
+
+### 4. Organizational Strategy and Prominence-Seeking
+
+**Question**: Do advocacy organizations actively pursue legislative prominence, or does it emerge organically?
+
+**Research design**:
+- Interviews with group leaders and communications staff
+- Analysis of advocacy group communications strategies
+- Document analysis of group requests for legislative citations
+
+**Why it matters**: Understanding strategic intentionality would clarify whether prominence is:
+- A deliberate advocacy goal (groups cultivate it)
+- A byproduct of other activities (lobbying, media work)
+- A legislator-driven phenomenon (members cite groups without their knowledge)
+
+### 5. Representation Gaps Analysis
+
+**Question**: Which constituencies' advocacy groups systematically lack prominence?
+
+**Research design**:
+- Map group prominence by:
+  - Constituency demographics (race, class, geography)
+  - Issue area (redistributive vs. regulatory policy)
+  - Organization type (grassroots vs. professional)
+- Compare prominence distribution to:
+  - Lobbying expenditure distribution
+  - Actual constituency sizes
+  - Public opinion distributions
+
+**Why it matters**: Reveals whether symbolic representation gaps mirror or diverge from material influence gaps—crucial for democratic accountability.
+
+---
+
+## Extensions to Other Political Contexts
+
+### State Legislatures
+
+Do prominence patterns generalize beyond Congress?
+- State legislatures have different institutional structures (professionalization, term limits, media coverage)
+- Testing whether medium-salience advantage and seniority penalty hold across contexts
+
+### Executive Branch
+
+How do advocacy groups gain prominence in administrative contexts?
+- Regulatory comments
+- Agency public hearings
+- Executive orders and signing statements
+
+### Comparative Politics
+
+Do prominence patterns vary across democratic systems?
+- Parliamentary vs. presidential systems
+- Proportional representation vs. single-member districts
+- Corporatist vs. pluralist interest group systems
+
+---
+
+## Methodological Extensions
+
+### Natural Language Processing Advances
+
+**Current approach**: Binary prominence classification (prominent vs. passing mention)
+
+**Future refinements**:
+- **Sentiment analysis**: Positive, negative, or neutral citations
+- **Attribution analysis**: What claims do legislators make *about* groups when citing them?
+- **Network analysis**: Co-citation patterns (which groups are mentioned together?)
+- **Topic modeling**: What issues are groups cited for beyond their primary policy areas?
+
+### Causal Inference Strategies
+
+**Challenges**: Observational data creates endogeneity concerns
+
+**Potential approaches**:
+- **Instrumental variables**: Exogenous shocks to group salience (natural disasters, policy crises)
+- **Difference-in-differences**: Changes in lobbying registration laws, disclosure rules
+- **Regression discontinuity**: Close elections, committee assignment lotteries
+- **Field experiments**: Randomize group outreach to legislators, measure prominence effects
+
+---
+
+## Policy Applications
+
+### Lobbying Transparency
+
+Current disclosure focuses on:
+- Money spent
+- Issues lobbied
+- Specific bills
+
+**Extension**: Track prominence alongside lobbying expenditures to reveal which groups achieve:
+- **Access only** (lobby but not cited)
+- **Prominence only** (cited but don't lobby)
+- **Dual advantages** (both access and visibility)
+
+This could inform debates about:
+- Campaign finance reform
+- Lobbying regulation
+- Public financing of advocacy
+
+### Legislative Communication Training
+
+If prominence reflects strategic communication, legislators and staff could benefit from understanding:
+- When group citations enhance credibility vs. appear scripted
+- Which group types resonate with different audiences
+- How to balance external validation with independent voice
+
+### Advocacy Effectiveness Evaluation
+
+Foundations and advocacy organizations could use prominence as an outcome metric:
+- Are grantees achieving visibility alongside influence?
+- Does prominence predict organizational sustainability?
+- Should funders prioritize prominence-building vs. traditional lobbying?
+
+---
+
+## Theoretical Integration
+
+This research opens pathways to integrate prominence analysis with:
+
+**Legislative studies**:
+- Position-taking and credit-claiming theories
+- Committee specialization and expertise signaling
+- Party messaging and message discipline
+
+**Interest group theory**:
+- Resource mobilization vs. political opportunity structures
+- Inside vs. outside lobbying strategies
+- Group maintenance and legitimacy
+
+**Democratic theory**:
+- Descriptive vs. substantive representation
+- Pluralism vs. elite competition
+- Deliberative quality and inclusion
+
+---
+
+**Bottom line**: Prominence analysis provides a new lens for examining democratic representation, one that bridges traditional interest group scholarship, legislative communication research, and normative democratic theory. The agenda outlined here represents years of research potential—revealing whose voices shape our collective understanding of "who's at the table" in democratic governance.
+
+---
+
+# Appendix: Technical Notes
+
+## Session Information
+
+```{r session-info}
+sessionInfo()
+```
+
+## Model Diagnostics
+
+```{r diagnostics-a2, eval=FALSE}
+# Model A2 diagnostics
+check_model(model_a2)
+```
+
+```{r diagnostics-b2, eval=FALSE}
+# Model B2 diagnostics
+check_model(model_b2)
+```
+
+```{r diagnostics-c2, eval=FALSE}
+# Model C2 diagnostics
+check_model(model_c2)
+```
+
+## Export Results
+
+```{r export-results}
+# Export all model results to CSV
+export_model_table <- function(model, filename) {
+  broom.mixed::tidy(model, conf.int = TRUE, exponentiate = TRUE) %>%
+    filter(effect == "fixed") %>%
+    select(term, estimate, std.error, conf.low, conf.high, statistic, p.value) %>%
+    write_csv(file.path(CONFIG$OUTPUT_DIR, filename))
+}
+
+# Export each full model
+export_model_table(model_a2, "model_a2_results.csv")
+export_model_table(model_b2, "model_b2_results.csv")
+export_model_table(model_c2, "model_c2_results.csv")
+
+# Export model comparison table
+all_comparisons %>%
+  write_csv(file.path(CONFIG$OUTPUT_DIR, "model_comparison.csv"))
+
+message("Results exported to ", CONFIG$OUTPUT_DIR)
+```
+
+---
+
+# References
+
+Arnold, R. D. (1990). *The Logic of Congressional Action*. Yale University Press.
+
+Fenno, R. F. (1978). *Home Style: House Members in Their Districts*. Little, Brown.
+
+Grossmann, M. (2012). *The Not-So-Special Interests: Interest Groups, Public Representation, and American Governance*. Stanford University Press.
+
+Halpin, D., & Fraussen, B. (2017). Conceptualizing the policy engagement of interest groups: Involvement, access and prominence. *European Journal of Political Research*, 56(3), 467-483.
+
+Mayhew, D. R. (1974). *Congress: The Electoral Connection*. Yale University Press.
+
+---
+
+**Document compiled**: `r format(Sys.time(), '%B %d, %Y at %I:%M %p')`

@@ -54,7 +54,10 @@ The **`multi_level_data`** dataset provides a **validated, analysis-ready starti
 ```
 .
 ├── README.md                      # This file
+├── USAGE_GUIDE.md                 # ⭐ Detailed usage instructions - START HERE
+├── CONTRIBUTING.md                # How to contribute to this project
 ├── LICENSE                        # MIT License
+├── requirements.txt               # Python dependencies
 │
 ├── legacy/                        # ⚠️ ORIGINAL THESIS CODE (2023)
 │   ├── README.md                  # Why legacy code is not reproducible
@@ -69,105 +72,75 @@ The **`multi_level_data`** dataset provides a **validated, analysis-ready starti
 ├── data/                          # 📊 DATA
 │   └── multi_level_data/          # 🎯 THE REPRODUCIBILITY ANCHOR
 │       ├── README.md              # Complete dataset documentation
-│       └── multi_level_data_v1.0.parquet  # The dataset (if available)
+│       ├── df_interest_group_prominence_FINAL.csv  # Main analysis dataset
+│       ├── level1_FINAL.csv       # Level 1 (mentions) data
+│       └── multi_level_data.csv   # Complete hierarchical data
 │
 ├── analysis/                      # 📈 REPRODUCIBLE ANALYSIS
 │   ├── README.md                  # How to reproduce thesis findings
-│   ├── notebooks/                 # Jupyter notebooks for analysis
-│   │   ├── 01_data_exploration.ipynb
-│   │   ├── 02_descriptive_statistics.ipynb
-│   │   ├── 03_reproduce_thesis_results.ipynb
-│   │   └── 04_extended_analyses.ipynb
-│   └── scripts/                   # R/Python scripts for modeling
-│       ├── multilevel_models.R
-│       └── visualizations.py
+│   ├── 01_Exploratory_Prominence_Analysis.ipynb  # ⭐ MAIN ANALYSIS
+│   ├── 02_Statistical_Models.ipynb               # Statistical modeling
+│   └── 03_Multilevel_Models.Rmd                  # R-based GLMM models
 │
-├── outputs/                       # 📈 ANALYSIS OUTPUTS
+├── output/                        # 📈 ANALYSIS OUTPUTS
 │   ├── figures/                   # Publication-ready plots
 │   └── tables/                    # Regression tables
 │
 └── docs/                          # 📚 DOCUMENTATION
-    ├── data_dictionary.md         # Variable definitions
-    └── reproducibility_guide.md   # Step-by-step reproduction
+    └── README.md                  # Documentation overview
 ```
 
 ---
 
 ## 🚀 Quick Start: Reproducing Thesis Results
 
-### Prerequisites
+### For First-Time Users
+
+**👉 See [USAGE_GUIDE.md](USAGE_GUIDE.md) for comprehensive instructions**
+
+### Fast Track (5 minutes)
 
 ```bash
-# Python 3.8+
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install pandas numpy scikit-learn matplotlib seaborn jupyter
-
-# R 4.0+ (for statistical models)
-# In R console:
-install.packages(c("lme4", "ggplot2", "broom.mixed", "arrow"))
-```
-
-### Step 1: Access the Dataset
-
-```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/kmazurek95/MastersThesis_InterestGroupAnalysis.git
 cd MastersThesis_InterestGroupAnalysis
 
-# Navigate to the dataset
-cd data/multi_level_data
+# 2. Install Python dependencies
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# 3. Open the main analysis notebook
+jupyter notebook analysis/01_Exploratory_Prominence_Analysis.ipynb
 ```
 
-**Note**: The dataset file may not be in the repository due to size. See [`data/multi_level_data/README.md`](./data/multi_level_data/README.md) for access instructions.
+### For R Users
 
-### Step 2: Load and Explore the Data
+```r
+# Install R packages
+install.packages(c("lme4", "ggplot2", "broom.mixed", "readr", "dplyr", "knitr"))
 
-**Python:**
+# Open the R Markdown file
+# analysis/03_Multilevel_Models.Rmd
+```
+
+### Dataset Access
+
+The data files are available in [data/multi_level_data/](./data/multi_level_data/):
+- `df_interest_group_prominence_FINAL.csv` - Main analysis dataset
+- `level1_FINAL.csv` - Level 1 (mentions) data
+- `multi_level_data.csv` - Complete hierarchical data
+
+**Load in Python:**
 ```python
 import pandas as pd
-
-# Load the dataset
-data = pd.read_parquet('data/multi_level_data/multi_level_data_v1.0.parquet')
-
-# Explore
-print(f"Total mentions: {len(data)}")
-print(f"Prominent mentions: {data['prominent'].sum()}")
-print(f"Date range: {data['date'].min()} to {data['date'].max()}")
-print(f"Policy areas: {data['policy_area'].nunique()}")
+data = pd.read_csv('data/multi_level_data/df_interest_group_prominence_FINAL.csv')
 ```
 
-**R:**
+**Load in R:**
 ```r
-library(arrow)
-
-# Load the dataset
-data <- read_parquet("data/multi_level_data/multi_level_data_v1.0.parquet")
-
-# Explore
-dim(data)
-summary(data$prominent)
-table(data$policy_area)
-```
-
-### Step 3: Reproduce Thesis Results
-
-Run the provided analysis notebooks:
-
-```bash
-# Start Jupyter
-jupyter notebook analysis/notebooks/
-
-# Run notebooks in order:
-# 1. 01_data_exploration.ipynb
-# 2. 02_descriptive_statistics.ipynb
-# 3. 03_reproduce_thesis_results.ipynb
-```
-
-Or run the R models directly:
-
-```bash
-Rscript analysis/scripts/multilevel_models.R
+library(readr)
+data <- read_csv("data/multi_level_data/df_interest_group_prominence_FINAL.csv")
 ```
 
 ---

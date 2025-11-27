@@ -1,0 +1,58 @@
+# Core Data Science Packages
+numpy>=1.21.0
+pandas>=1.3.0
+scipy>=1.7.0
+
+# Data Processing
+pyarrow>=5.0.0  # For reading Parquet files
+openpyxl>=3.0.0  # For Excel file support
+
+# Machine Learning
+scikit-learn>=1.0.0
+
+# Natural Language Processing
+nltk>=3.6.0
+spacy>=3.0.0
+
+# Visualization
+matplotlib>=3.4.0
+seaborn>=0.11.0
+plotly>=5.0.0
+
+# Interactive Analysis
+jupyter>=1.0.0
+notebook>=6.4.0
+ipywidgets>=7.6.0
+
+# Statistical Analysis
+statsmodels>=0.13.0
+
+# Data Validation
+pandera>=0.10.0  # Optional: for data validation
+
+# Utilities
+tqdm>=4.62.0  # Progress bars
+python-dotenv>=0.19.0  # Environment variables
+
+# Export and Reporting
+tabulate>=0.8.9  # Pretty-print tables
+jinja2>=3.0.0  # Template rendering
+
+# Testing (optional but recommended)
+pytest>=6.2.0
+pytest-cov>=2.12.0
+
+# Code Quality (optional)
+black>=21.0  # Code formatting
+flake8>=3.9.0  # Linting
+isort>=5.9.0  # Import sorting
+
+# API Access (for legacy data collection scripts)
+requests>=2.26.0
+beautifulsoup4>=4.9.0
+
+# Google Trends (for policy salience data)
+pytrends>=4.8.0
+
+# Large Data Processing (optional)
+dask[complete]>=2021.9.0  # For larger-than-memory datasets
