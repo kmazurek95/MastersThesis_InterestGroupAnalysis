@@ -134,3 +134,21 @@ temp/
 *.bak
 *.backup
 *~
+
+# Claude Code configuration (local development only)
+.claude/
+
+# Internal documentation/checklists (not needed on GitHub)
+GITHUB_UPLOAD_CHECKLIST.md
+SETUP_COMPLETE.md
+CONTRIBUTING.md
+
+# R generated files
+*.html
+*_files/
+*_cache/
+
+# Output directories (keep structure but ignore generated content)
+output/**
+!output/README.md
+!output/.gitkeep
