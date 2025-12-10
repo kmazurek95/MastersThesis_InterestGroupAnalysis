@@ -15,7 +15,7 @@ This directory contains all code needed to reproduce the thesis findings using t
 ```
 analysis/
 ├── README.md                                      # This file
-├── 01_Exploratory_Prominence_Analysis.ipynb      # ⭐ MAIN ANALYSIS - START HERE
+├── 01_Exploratory_Prominence_Analysis.ipynb      # MAIN ANALYSIS - START HERE
 ├── 02_Statistical_Models.ipynb                   # Statistical modeling in Python
 └── 03_Multilevel_Models.Rmd                      # R-based GLMM models
 ```
@@ -64,7 +64,7 @@ Rscript -e "rmarkdown::render('analysis/03_Multilevel_Models.Rmd')"
 
 ## Notebooks
 
-### 01_Exploratory_Prominence_Analysis.ipynb ⭐
+### 01_Exploratory_Prominence_Analysis.ipynb
 
 **The centerpiece of the portfolio analysis**
 
