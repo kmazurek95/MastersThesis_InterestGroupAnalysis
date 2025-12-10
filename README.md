@@ -11,7 +11,7 @@
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
 This repository contains research examining **why some advocacy organizations receive more recognition from politicians than others** in U.S. Congressional debates. Using 77,000+ legislative documents from the 114th and 115th Congress (2014-2018), this study combines:
 
@@ -28,20 +28,20 @@ This repository contains research examining **why some advocacy organizations re
 
 ---
 
-## 📣 Repository Purpose
+## Repository Purpose
 
 This repository serves two main purposes:
 
-### 1. **Legacy Code Archive** 📚
+### 1. **Legacy Code Archive**
 
 The `/legacy/` folder contains the **original thesis code** exactly as it existed during the 2023 research. This code is preserved for:
 - Historical reference and transparency
 - Understanding the original methodology
 - Learning about the research process
 
-⚠️ **Important**: The legacy code is **not fully reproducible** due to manual steps, missing intermediate data, and ad-hoc processing. See [`legacy/README.md`](./legacy/README.md) for details.
+**Important**: The legacy code is **not fully reproducible** due to manual steps, missing intermediate data, and ad-hoc processing. See [`legacy/README.md`](./legacy/README.md) for details.
 
-### 2. **Reproducible Dataset** 🎯
+### 2. **Reproducible Dataset**
 
 The **`multi_level_data`** dataset provides a **validated, analysis-ready starting point** for reproducing and extending the thesis findings.
 
@@ -49,17 +49,17 @@ The **`multi_level_data`** dataset provides a **validated, analysis-ready starti
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```
 .
 ├── README.md                      # This file
-├── USAGE_GUIDE.md                 # ⭐ Detailed usage instructions - START HERE
+├── USAGE_GUIDE.md                 # Detailed usage instructions - START HERE
 ├── CONTRIBUTING.md                # How to contribute to this project
 ├── LICENSE                        # MIT License
 ├── requirements.txt               # Python dependencies
 │
-├── legacy/                        # ⚠️ ORIGINAL THESIS CODE (2023)
+├── legacy/                        # ORIGINAL THESIS CODE (2023)
 │   ├── README.md                  # Why legacy code is not reproducible
 │   ├── 1. Data Collection/        # Original GovInfo API scripts
 │   ├── 2. Data Proccessing/       # Original processing scripts
@@ -69,34 +69,34 @@ The **`multi_level_data`** dataset provides a **validated, analysis-ready starti
 │       ├── Thesis_UvA_Kaleb_Mazurek.pdf
 │       └── Technical Report MA Thesis.pdf
 │
-├── data/                          # 📊 DATA
-│   └── multi_level_data/          # 🎯 THE REPRODUCIBILITY ANCHOR
+├── data/                          # DATA
+│   └── multi_level_data/          # THE REPRODUCIBILITY ANCHOR
 │       ├── README.md              # Complete dataset documentation
 │       ├── df_interest_group_prominence_FINAL.csv  # Main analysis dataset
 │       ├── level1_FINAL.csv       # Level 1 (mentions) data
 │       └── multi_level_data.csv   # Complete hierarchical data
 │
-├── analysis/                      # 📈 REPRODUCIBLE ANALYSIS
+├── analysis/                      # REPRODUCIBLE ANALYSIS
 │   ├── README.md                  # How to reproduce thesis findings
-│   ├── 01_Exploratory_Prominence_Analysis.ipynb  # ⭐ MAIN ANALYSIS
+│   ├── 01_Exploratory_Prominence_Analysis.ipynb  # MAIN ANALYSIS
 │   ├── 02_Statistical_Models.ipynb               # Statistical modeling
 │   └── 03_Multilevel_Models.Rmd                  # R-based GLMM models
 │
-├── output/                        # 📈 ANALYSIS OUTPUTS
+├── output/                        # ANALYSIS OUTPUTS
 │   ├── figures/                   # Publication-ready plots
 │   └── tables/                    # Regression tables
 │
-└── docs/                          # 📚 DOCUMENTATION
+└── docs/                          # DOCUMENTATION
     └── README.md                  # Documentation overview
 ```
 
 ---
 
-## 🚀 Quick Start: Reproducing Thesis Results
+## Quick Start: Reproducing Thesis Results
 
 ### For First-Time Users
 
-**👉 See [USAGE_GUIDE.md](USAGE_GUIDE.md) for comprehensive instructions**
+** See [USAGE_GUIDE.md](USAGE_GUIDE.md) for comprehensive instructions**
 
 ### Fast Track (5 minutes)
 
@@ -151,22 +151,22 @@ data <- read_csv("data/multi_level_data/df_interest_group_prominence_FINAL.csv")
 
 The **`multi_level_data`** dataset is a **cleaned, validated, hierarchical dataset** that contains:
 
-- ✅ **77,000+ Congressional Record documents** (2014-2018)
-- ✅ **Processed paragraphs** with speaker assignments
-- ✅ **Interest group mentions** with prominence labels
-- ✅ **Machine learning predictions** (SVM classifier outputs)
-- ✅ **Speaker metadata** (seniority, party, state, committee membership)
-- ✅ **Group-level variables** (lobbying expenditure, policy focus, membership)
-- ✅ **Policy-level variables** (salience, topic categories)
+- **77,000+ Congressional Record documents** (2014-2018)
+- **Processed paragraphs** with speaker assignments
+- **Interest group mentions** with prominence labels
+- **Machine learning predictions** (SVM classifier outputs)
+- **Speaker metadata** (seniority, party, state, committee membership)
+- **Group-level variables** (lobbying expenditure, policy focus, membership)
+- **Policy-level variables** (salience, topic categories)
 
 ### Why Start Here?
 
 The original thesis pipeline had **manual steps** and **missing intermediate data** that prevent full reproduction from raw Congressional Record data. The `multi_level_data` dataset provides:
 
-✅ **Complete reproducibility** for all thesis findings
-✅ **Validated ground truth** - all variables checked and documented
-✅ **Analysis-ready format** - no preprocessing needed
-✅ **Comprehensive documentation** - data dictionary with all variables
+**Complete reproducibility** for all thesis findings
+**Validated ground truth** - all variables checked and documented
+**Analysis-ready format** - no preprocessing needed
+**Comprehensive documentation** - data dictionary with all variables
 
 ### Structure
 
@@ -183,7 +183,7 @@ Hierarchical levels:
 
 ---
 
-## 📖 Key Concepts
+## Key Concepts
 
 ### What Is "Prominence"?
 
@@ -202,7 +202,7 @@ Hierarchical levels:
 
 ---
 
-## 🔬 Research Methodology
+## Research Methodology
 
 ### 1. Data Collection (2014-2018)
 - **Source**: GovInfo API (Congressional Record)
@@ -228,7 +228,7 @@ Hierarchical levels:
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 ### Essential Reading
 
@@ -244,7 +244,7 @@ Hierarchical levels:
 
 ---
 
-## 🎓 Using This Repository
+## Using This Repository
 
 ### For Researchers Wanting to Reproduce Results
 
@@ -276,22 +276,22 @@ Hierarchical levels:
 
 ---
 
-## ⚠️ What This Repository Does NOT Provide
+## What This Repository Does NOT Provide
 
-❌ **Raw Congressional Record data** - Too large, must be collected via API
-❌ **Full pipeline from scratch** - Manual steps and missing data prevent this
-❌ **Data collection scripts that work out-of-the-box** - Legacy code requires adaptation
-❌ **New data for recent Congresses** - Covers 2014-2018 only
+**Raw Congressional Record data** - Too large, must be collected via API
+**Full pipeline from scratch** - Manual steps and missing data prevent this
+**Data collection scripts that work out-of-the-box** - Legacy code requires adaptation
+**New data for recent Congresses** - Covers 2014-2018 only
 
 **What it DOES provide:**
-✅ **Complete reproducibility from the validated dataset**
-✅ **Transparent documentation of limitations**
-✅ **All code and decisions from original research**
-✅ **Analysis-ready data for extensions**
+**Complete reproducibility from the validated dataset**
+**Transparent documentation of limitations**
+**All code and decisions from original research**
+**Analysis-ready data for extensions**
 
 ---
 
-## 📜 Citation
+## Citation
 
 If you use this data or methodology in your research, please cite:
 
@@ -336,7 +336,7 @@ For questions about:
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
@@ -348,7 +348,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 ### Institutions
 - **University of Amsterdam** - Political Science Department
@@ -363,7 +363,7 @@ This repository demonstrates that **research transparency** means acknowledging 
 
 ---
 
-## 📊 Project Statistics
+## Project Statistics
 
 - **Original Data Collection**: 77,000+ Congressional Record documents
 - **Time Period**: 2014-2018 (114th & 115th Congress)
