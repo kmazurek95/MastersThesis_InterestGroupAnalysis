@@ -1,6 +1,6 @@
 # Interest Group Prominence in Congressional Speech
 
-MSc Thesis - University of Amsterdam, 2024
+MSc Thesis, University of Amsterdam, 2024
 
 I studied why some advocacy organizations get recognized as authoritative voices in U.S. congressional floor speeches while others are mentioned only in passing. Using NLP text classification and multilevel regression models, I analyzed prominence patterns across the 114th and 115th Congress.
 
@@ -10,6 +10,13 @@ I studied why some advocacy organizations get recognized as authoritative voices
 - Medium-salience policy areas show higher advocacy visibility than high-salience ones
 - Politician seniority has an unexpected negative effect on prominence
 - The top 5% of organizations account for over 50% of all prominent mentions
+
+## Thesis Documents
+
+| Document | Description |
+|----------|-------------|
+| [Full Thesis (PDF)](legacy/5.%20Visualization%20and%20Reporting/Thesis_UvA_Kaleb_Mazurek.pdf) | Complete thesis manuscript |
+| [Technical Report (PDF)](legacy/5.%20Visualization%20and%20Reporting/Technical%20Report%20MA%20Thesis.pdf) | Methodology and implementation details |
 
 ## Data
 
@@ -24,18 +31,25 @@ I studied why some advocacy organizations get recognized as authoritative voices
 - Statistical models: Generalized Linear Mixed-Effects Models (GLMMs) in R
 - Random effects: Organization and Policy Area
 
+## Analysis Notebooks
+
+| Notebook | What it does |
+|----------|-------------|
+| [01_Exploratory_Prominence_Analysis.ipynb](analysis/01_Exploratory_Prominence_Analysis.ipynb) | Concentration, distribution, partisan patterns |
+| [02_Statistical_Models.ipynb](analysis/02_Statistical_Models.ipynb) | Python implementation of GLMM models A, B, C |
+| [03_Multilevel_Models.Rmd](analysis/03_Multilevel_Models.Rmd) | Primary R implementation with lme4 (thesis models) |
+
 ## Repository Structure
 
 ```
 analysis/          Jupyter notebooks and R Markdown for analysis
 legacy/            Original pipeline code (data collection, processing, classification, modeling)
 data/              Analysis datasets (managed via Git LFS)
-output/            Generated figures and tables
 ```
 
 ## How to Run
 
-```bash
+```
 git clone https://github.com/kmazurek95/MastersThesis_InterestGroupAnalysis.git
 cd MastersThesis_InterestGroupAnalysis
 pip install -r requirements.txt
@@ -48,7 +62,7 @@ Data files are tracked with Git LFS. Run `git lfs pull` if CSVs appear as pointe
 
 ## Related Work
 
-A modernized re-implementation of this pipeline with improved extraction and classification (F1 = 0.91) is available at [ThesisPipelineRework](https://github.com/kmazurek95/ThesisPipelineRework).
+A modernized re-implementation of this pipeline with improved extraction and classification (F1 = 0.91, kappa = 0.84) is available at [ThesisPipelineRework](https://github.com/kmazurek95/ThesisPipelineRework).
 
 ## Citation
 

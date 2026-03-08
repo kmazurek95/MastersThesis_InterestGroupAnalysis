@@ -1,6 +1,6 @@
 # --------------------------------------------
 # Title: Model B Analysis Report
-# Author: [Your Name]
+# Author: Kaleb Mazurek
 # Date: 2023-06-16
 # Description: Data preprocessing, model fitting, and results generation for Model B.
 # --------------------------------------------

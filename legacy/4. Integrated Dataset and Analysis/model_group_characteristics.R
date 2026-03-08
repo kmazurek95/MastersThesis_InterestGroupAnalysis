@@ -1,6 +1,6 @@
 # --------------------------------------------
 # Title: Model C Analysis Report
-# Author: [Your Name]
+# Author: Kaleb Mazurek
 # Date: [Current Date]
 # Description: Data preprocessing, model fitting, and results generation for Model C.
 # --------------------------------------------
