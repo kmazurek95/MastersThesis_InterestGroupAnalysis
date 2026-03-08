@@ -3,10 +3,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Configure pandas to display all columns
 pd.set_option('display.max_columns', None)
 
-# **Function to Load Data**
 def load_dataframe(file_path, file_type='csv'):
     """
     Load data from a CSV or JSON file.
@@ -25,7 +23,6 @@ def load_dataframe(file_path, file_type='csv'):
     else:
         raise ValueError(f"Unsupported file type: {file_type}")
 
-# **Function to Clean Data**
 def clean_data(df):
     """
     Clean the dataset by handling missing values and anomalies.
@@ -47,7 +44,6 @@ def clean_data(df):
     assert invalid_rows.shape[0] + df.shape[0] == original_size, "Row mismatch after filtering."
     return df
 
-# **Function to Process Date Columns**
 def process_date_columns(df):
     """
     Convert and compute new features from date-related columns.
@@ -68,7 +64,6 @@ def process_date_columns(df):
 
     return df
 
-# **Function to Assign Data Types**
 def assign_data_types(df):
     """
     Assign appropriate data types to columns for optimized analysis.
@@ -107,7 +102,6 @@ def assign_data_types(df):
             df[column] = df[column].astype(dtype)
     return df
 
-# **Function to Normalize Salience**
 def normalize_salience(df, column):
     """
     Normalize a salience column to represent proportions of the total salience.
@@ -121,7 +115,6 @@ def normalize_salience(df, column):
     """
     return df[column] / df[column].sum()
 
-# **Function to Create Ordinal Variables**
 def create_ordinal_variable(df, column, bins, labels):
     """
     Create an ordinal variable by binning a numeric column.
@@ -137,7 +130,6 @@ def create_ordinal_variable(df, column, bins, labels):
     """
     return pd.cut(df[column], bins=bins, labels=labels, include_lowest=True)
 
-# **Function to Calculate Percentage Change**
 def calculate_percentage_change(df, column):
     """
     Calculate the percentage change for a given column.
@@ -153,7 +145,6 @@ def calculate_percentage_change(df, column):
     pct_change.replace([np.inf, -np.inf], np.nan, inplace=True)
     return pct_change
 
-# **Function to Add Lagged Variables**
 def add_lagged_variables(df, column_list, lags=1):
     """
     Add lagged versions of specified columns to the DataFrame.
@@ -172,7 +163,6 @@ def add_lagged_variables(df, column_list, lags=1):
             df[lagged_column_name] = df[column].shift(lag)
     return df
 
-# **Function to Visualize and Transform**
 def transform_and_plot(df, column):
     """
     Apply a log transformation to a column and visualize the changes.
@@ -181,10 +171,8 @@ def transform_and_plot(df, column):
     - df (pd.DataFrame): Input DataFrame.
     - column (str): Column name to transform.
     """
-    # Replace zero values to avoid issues with log transformation
     df[column].replace(0, 0.001, inplace=True)
 
-    # Original data visualizations
     plt.figure(figsize=(7, 6))
     sns.histplot(df[column], bins=30, kde=False)
     plt.title(f'Original Histogram: {column}')
@@ -195,10 +183,8 @@ def transform_and_plot(df, column):
     plt.title(f'Original Boxplot: {column}')
     plt.show()
 
-    # Apply log transformation
     df[f'{column}_log'] = np.log(df[column])
 
-    # Transformed data visualizations
     plt.figure(figsize=(7, 6))
     sns.histplot(df[f'{column}_log'], bins=30, kde=False)
     plt.title(f'Log-Transformed Histogram: {column}')
@@ -209,7 +195,6 @@ def transform_and_plot(df, column):
     plt.title(f'Log-Transformed Boxplot: {column}')
     plt.show()
 
-# **Main Workflow**
 if __name__ == "__main__":
     # File path to data
     file_path = "path_to_your_file.csv"  # Update with the actual path
@@ -264,10 +249,8 @@ from sklearn.preprocessing import StandardScaler
 import statsmodels.api as sm
 from scipy import stats
 
-# Configure pandas to display all columns for easier debugging
 pd.set_option('display.max_columns', None)
 
-# **Function to Standardize Data**
 def standardize_data(df, columns_to_scale):
     """
     Standardize numeric columns to have zero mean and unit variance.
@@ -285,7 +268,6 @@ def standardize_data(df, columns_to_scale):
     df.update(scaled_df)  # Update the original DataFrame with standardized values
     return df
 
-# **Function to Fit Probit Model**
 def fit_probit_model(df, X_columns, y_column):
     """
     Fit a Probit regression model to predict a binary outcome.
@@ -298,18 +280,15 @@ def fit_probit_model(df, X_columns, y_column):
     Returns:
     - statsmodels object: Fitted Probit model.
     """
-    # Drop rows with missing values in the specified columns
     df_clean = df.dropna(subset=X_columns + [y_column])
-    X = sm.add_constant(df_clean[X_columns])  # Add a constant term for the regression
+    X = sm.add_constant(df_clean[X_columns])
     y = df_clean[y_column]
 
-    # Fit the Probit model
     probit_model = sm.Probit(y, X)
     probit_result = probit_model.fit()
     print(probit_result.summary())
     return probit_result
 
-# **Function to Aggregate Data**
 def aggregate_data(df, group_by_column, aggregation_rules):
     """
     Aggregate data based on specified rules for each group.
@@ -328,7 +307,6 @@ def aggregate_data(df, group_by_column, aggregation_rules):
     ]
     return aggregated_df
 
-# **Function to Transform and Visualize Data**
 def transform_and_plot(df, columns, transform_type='log', plot=True):
     """
     Apply transformations to columns and visualize the results.
@@ -363,7 +341,6 @@ def transform_and_plot(df, columns, transform_type='log', plot=True):
 
     return df
 
-# **Main Workflow**
 if __name__ == "__main__":
     # Step 1: Load the dataset
     file_path = "path_to_your_file.csv"  # Update with the actual file path

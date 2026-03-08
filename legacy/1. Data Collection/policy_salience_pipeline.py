@@ -6,8 +6,6 @@ from tqdm import tqdm
 from pytrends.request import TrendReq
 import matplotlib.pyplot as plt
 
-# =========================== Utility Functions ============================
-
 def load_dataframe(file_path, file_type='csv'):
     """
     Load data from CSV or JSON file into a DataFrame.
@@ -66,14 +64,11 @@ def get_google_trends(pytrends, constant_topic, topics, date):
     pytrends.build_payload(kw_list, cat=0, timeframe=timeframe, geo='US')
     return pytrends.interest_over_time()
 
-# =========================== Data Preparation ============================
-
-# File paths
-BASE_DIR = "C://Users//kaleb//OneDrive//Desktop//DATA//COMPLETE//"
+DATA_PATH = os.environ.get("DATA_PATH", os.path.join(os.path.dirname(__file__), "..", "..", "data"))
+BASE_DIR = DATA_PATH
 granule_file = os.path.join(BASE_DIR, "g.graule_meta_data_CREC_114_AND_115.csv")
 prominence_file = os.path.join(BASE_DIR, "paragraphs_NAME_114_115_EXPANDED_CLASSIFIED__UPDATED__4-29-2023____3B.json")
 
-# Load and merge data
 print("Loading data...")
 df_granule = load_dataframe(granule_file, file_type='csv')
 df_prominence = load_dataframe(prominence_file, file_type='json')
@@ -82,9 +77,6 @@ print("Merging data...")
 merged_df = pd.merge(df_granule, df_prominence, on="granuleId", how="left")
 unique_dates = merged_df['dateIssued'].unique()
 
-# =========================== Google Trends Data Collection ============================
-
-# Setup
 print("Setting up Google Trends API...")
 pytrends = TrendReq(hl='en-US', tz=360)
 constant_topic = 'Economy'
@@ -97,7 +89,6 @@ other_topics = [
 ]
 topic_groups = split_list(other_topics, 4)  # Split topics into groups of 4 to handle API limits
 
-# Fetch trends data
 print("Collecting Google Trends data...")
 all_trends_data = []
 
@@ -115,31 +106,23 @@ for date in tqdm(unique_dates[:10], desc="Processing Dates"):  # Limit to 10 dat
         combined_data['dateIssued'] = date
         all_trends_data.append(combined_data)
 
-# Combine all trends data
 print("Combining all trends data...")
 final_trends_data = pd.concat(all_trends_data).reset_index()
 save_dataframe(final_trends_data, "google_trends_data_combined.csv")
-
-# =========================== Data Analysis ============================
 
 print("Analyzing Google Trends data...")
 final_trends_data['date'] = pd.to_datetime(final_trends_data['dateIssued'])
 final_trends_data['year'] = final_trends_data['date'].dt.year
 final_trends_data['congress'] = final_trends_data['year'].apply(lambda y: 114 if y in [2015, 2016] else 115 if y in [2017, 2018] else None)
 
-# Calculate mean salience by congress and year
 policy_areas = [col for col in final_trends_data.columns if col not in ['date', 'dateIssued', 'year', 'congress']]
 mean_salience = final_trends_data.groupby(['year', 'congress'])[policy_areas].mean().reset_index()
 
-# Melt data for visualization
 policy_number_map = {topic: idx * 100 for idx, topic in enumerate(policy_areas, start=1)}
 melted_salience = mean_salience.melt(id_vars=['year', 'congress'], var_name='policy_area', value_name='mean_salience')
 melted_salience['issue_number'] = melted_salience['policy_area'].map(policy_number_map)
 
-# Save salience data
 save_dataframe(melted_salience, "salience_data_final.csv")
-
-# =========================== Visualization ============================
 
 print("Generating visualization...")
 plt.figure(figsize=(15, 7))

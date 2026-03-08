@@ -1,7 +1,3 @@
-# Install necessary libraries (use only if not installed)
-!pip install requests beautifulsoup4 tqdm retrying pandas
-
-# Imports
 import os
 import requests
 import json
@@ -12,12 +8,7 @@ import time
 from retrying import retry
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# Set your API key (replace with your actual key)
-os.environ['GOVINFO_API_KEY'] = 'IgmhiBjvtZhuBDFLlFSYkuGucsP2wKc8it97N4ln'
-
-# -------------------------------
-# Helper Functions
-# -------------------------------
+os.environ['GOVINFO_API_KEY'] = 'YOUR_API_KEY_HERE'  # Get your API key from https://api.data.gov/signup/
 
 @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
 def make_request(url, params=None):
@@ -71,10 +62,6 @@ def fetch_granule_details(link, api_key):
         print(f"Error fetching granule details for {link}: {e}")
         return None
 
-# -------------------------------
-# API Data Fetching Logic
-# -------------------------------
-
 def fetch_packages(api_url, params):
     """
     Retrieve package data from the API.
@@ -121,10 +108,6 @@ def process_granules_parallel(granule_links, api_key, workers=8):
                 print(f"Error processing granule: {e}")
     return results
 
-# -------------------------------
-# Main Functionality
-# -------------------------------
-
 def main():
     """
     Main function to fetch data for the 114th and 115th Congresses.
@@ -138,7 +121,6 @@ def main():
     for congress in congresses:
         print(f"\nStarting data collection for the {congress}th Congress...")
 
-        # API endpoint and parameters
         api_url = "https://api.govinfo.gov/collections/CREC/2015-01-01T00:00:10Z"
         params = {
             "pageSize": 1000,
@@ -147,10 +129,8 @@ def main():
             "api_key": os.getenv("GOVINFO_API_KEY"),
         }
 
-        # Resume from saved progress if available
         start_index = progress.get(str(congress), 0)
 
-        # Fetch packages
         packages = fetch_packages(api_url, params)
 
         for idx, package in enumerate(packages[start_index:], start=start_index):
@@ -167,12 +147,10 @@ def main():
                 granule_links = fetch_granules(granules_url, params["api_key"])
                 print(f"Found {len(granule_links)} granules.")
 
-                # Process granules concurrently
                 granule_data = process_granules_parallel(granule_links, params["api_key"])
                 df = pd.DataFrame(granule_data)
                 all_dataframes.append(df)
 
-                # Save intermediate progress
                 progress[str(congress)] = idx + 1
                 store_progress(progress_file, progress)
                 df.to_csv(f"package_{congress}_{idx}.csv", index=False)
@@ -181,7 +159,6 @@ def main():
                 print(f"Error processing package {idx + 1} for the {congress}th Congress: {e}")
                 continue
 
-    # Combine and save final results
     if all_dataframes:
         final_result = pd.concat(all_dataframes, ignore_index=True)
         final_result.to_csv("final_results_congresses.csv", index=False)

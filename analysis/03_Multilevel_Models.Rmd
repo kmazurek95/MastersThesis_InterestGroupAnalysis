@@ -163,15 +163,15 @@ options(
 ```{r config}
 # Configuration
 CONFIG <- list(
-  # File paths
-  DATA_DIR = file.path(".", "data"),
-  OUTPUT_DIR = file.path(".", "output"),
+  # File paths (relative to analysis/ directory)
+  DATA_DIR = file.path("..", "data", "multi_level_data"),
+  OUTPUT_DIR = file.path("..", "output", "figures"),
 
   # Data file
-  LEVEL1_FILE = "level1.csv",
+  LEVEL1_FILE = "level1_FINAL.csv",
 
   # Organization to exclude (if applicable)
-  EXCLUDED_ORG_ID = 20114287,
+  EXCLUDED_ORG_ID = NULL,
 
   # Random seed
   SEED = 42,
@@ -359,33 +359,17 @@ compute_issue_area_features <- function(df) {
 #'
 #' Categories: low (1-7), medium (8-14), high (15-21)
 compute_saliency_measure <- function(df) {
-  issue_area_codes <- c(
-    "100", "200", "300", "400", "500", "600", "700", "800", "900",
-    "1000", "1200", "1300", "1400", "1500", "1600", "1700", "1800",
-    "1900", "2000", "2100", "2300"
-  )
-
-  # Extract saliency rank for each row
+  # Use the existing issue_area_salience column from the dataset
   df <- df %>%
     mutate(
-      saliency_measure = map2_dbl(
-        level1_issue_area,
-        seq_len(n()),
-        function(area, idx) {
-          col_name <- paste0("level1_", area, "_saliency_rank")
-          if (col_name %in% names(df)) {
-            return(df[[col_name]][idx])
-          } else {
-            return(NA_real_)
-          }
-        }
+      saliency_measure = as.numeric(level1_issue_area_salience),
+      saliency_category = case_when(
+        is.na(saliency_measure) ~ NA_character_,
+        saliency_measure <= 7 ~ "low",
+        saliency_measure <= 14 ~ "medium",
+        TRUE ~ "high"
       ),
-      saliency_category = cut(
-        saliency_measure,
-        breaks = c(0, 7, 14, 21),
-        labels = c("low", "medium", "high"),
-        include.lowest = TRUE
-      )
+      saliency_category = factor(saliency_category, levels = c("low", "medium", "high"))
     )
 
   message("Saliency distribution:")
@@ -457,60 +441,14 @@ preprocess_data <- function(filepath, excluded_org_id = NULL) {
 
 ## Load and Preprocess Data
 
-**Note**: This notebook expects a `level1.csv` file in the `data/` directory. If you're working with the actual thesis data, place it there. Otherwise, we'll create synthetic data for demonstration.
-
-```{r load-data, eval=FALSE}
-# Load actual data (uncomment when data is available)
+```{r load-data}
+# Load actual thesis data
 level1 <- preprocess_data(
   file.path(CONFIG$DATA_DIR, CONFIG$LEVEL1_FILE),
   excluded_org_id = CONFIG$EXCLUDED_ORG_ID
 )
-```
 
-```{r synthetic-data}
-# Create synthetic data for demonstration
-# (Remove this section when using actual data)
-
-message("Creating synthetic data for demonstration...")
-
-n <- 15000
-n_orgs <- 500
-n_issues <- 21
-
-synthetic_data <- tibble(
-  level1_org_id = sample(1:n_orgs, n, replace = TRUE),
-  level1_issue_area = sample(as.character(seq(100, 2300, 100)), n, replace = TRUE),
-  level1_prominence = rbinom(n, 1, 0.45),
-  level1_chamber_x = sample(c("House of Representatives", "Senate"), n, replace = TRUE, prob = c(0.6, 0.4)),
-  level1_partyHistory = sample(c("Democrat", "Republican", "Independent"), n, replace = TRUE, prob = c(0.45, 0.45, 0.1)),
-  level1_ABBREVCAT = sample(c("(2) Trade and other business associations", "(7) Public interest", "(14) State and local governments"),
-                            n, replace = TRUE, prob = c(0.3, 0.5, 0.2)),
-  level1_MSHIP_STATUS11 = sample(c("(2) Association of individuals", "(3) Association of institutions", "(6) Other"),
-                                 n, replace = TRUE, prob = c(0.3, 0.5, 0.2)),
-  level1_seniority = sample(1:40, n, replace = TRUE),
-  level1_bills_sponsored = sample(0:100, n, replace = TRUE),
-  level1_YEARS_EXISTED = sample(1:100, n, replace = TRUE),
-  level1_OUTSIDE11 = rbinom(n, 1, 0.3),
-  level1_issue_maximal_overlap = rbinom(n, 1, 0.4),
-  level1_year_week = sample(201501:201752, n, replace = TRUE),
-  level1_termBeginYear = 2015,
-  level1_termEndYear = 2017
-)
-
-# Add saliency rank columns (simplified)
-for (area in unique(synthetic_data$level1_issue_area)) {
-  col_name <- paste0("level1_", area, "_saliency_rank")
-  synthetic_data[[col_name]] <- sample(1:21, n, replace = TRUE)
-}
-
-# Save synthetic data temporarily
-temp_file <- file.path(tempdir(), "level1_synthetic.csv")
-write_csv(synthetic_data, temp_file)
-
-# Preprocess synthetic data
-level1 <- preprocess_data(temp_file)
-
-message(sprintf("Created synthetic dataset with %s observations", format(nrow(level1), big.mark = ",")))
+message(sprintf("Loaded dataset with %s observations", format(nrow(level1), big.mark = ",")))
 ```
 
 ## Data Overview

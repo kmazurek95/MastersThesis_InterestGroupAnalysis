@@ -6,31 +6,21 @@ from urllib.parse import urlparse
 import os
 from dotenv import load_dotenv
 
-# -------------------------------
-# Setup and Constants
-# -------------------------------
-
-# Load environment variables (e.g., API key from .env file)
 load_dotenv()
 
-# File paths
-INPUT_FILE_PATH = r"C://Users//kaleb//OneDrive//Desktop//DATA//COMPLETE//g.references_CREC_114_AND_115.csv"
-OUTPUT_FILE_PATH = r"C://Users//kaleb//OneDrive//Desktop//OUTPUT DATA//df_references1.csv"
+DATA_PATH = os.environ.get("DATA_PATH", os.path.join(os.path.dirname(__file__), "..", "..", "data"))
+OUTPUT_PATH = os.environ.get("OUTPUT_PATH", os.path.join(os.path.dirname(__file__), "..", "..", "output"))
+INPUT_FILE_PATH = os.path.join(DATA_PATH, "g.references_CREC_114_AND_115.csv")
+OUTPUT_FILE_PATH = os.path.join(OUTPUT_PATH, "df_references1.csv")
 LOG_FILE = "failed_requests.log"
 
-# API Key (use the one from the environment file or a placeholder)
 API_KEY = os.getenv("API_KEY", "YOUR_API_KEY_HERE")
 
-# Logging setup
 logging.basicConfig(
     filename=LOG_FILE,
     level=logging.ERROR,
     format="%(asctime)s - %(message)s"
 )
-
-# -------------------------------
-# Helper Functions
-# -------------------------------
 
 def load_data(file_path: str) -> pd.DataFrame:
     """
@@ -51,13 +41,10 @@ def construct_package_id(row: pd.Series) -> tuple:
       1. The package ID for the bill.
       2. The API link to fetch the bill's data.
     """
-    # Determine bill version based on its type
     bill_version = "is" if row["type"] in ["S", "SRES"] else "ih"
 
-    # Build package ID
     package_id = f"BILLS-{row['congress']}{row['type'].lower()}{row['number']}{bill_version}"
 
-    # Build API link using the package ID
     link = f"https://api.govinfo.gov/packages/{package_id}/summary?api_key={API_KEY}"
 
     return package_id, link
@@ -93,16 +80,13 @@ def fetch_bill_data(links: list) -> list:
     print("Fetching data for bills...")
     for link in links:
         try:
-            # Add API key to the link
             url = f"{link}?api_key={API_KEY}"
             print(f"Requesting: {url}")
 
-            # Fetch bill data
             response = requests.get(url)
             if response.status_code == 200:
                 json_response = response.json()
 
-                # Fetch the bill text if available
                 txt_link = json_response.get("download", {}).get("txtLink")
                 if txt_link:
                     txt_url = f"{txt_link}?api_key={API_KEY}"
@@ -128,30 +112,20 @@ def save_data(df: pd.DataFrame, file_path: str):
     print(f"Saving data to: {file_path}")
     df.to_csv(file_path, index=False)
 
-# -------------------------------
-# Main Script
-# -------------------------------
-
 if __name__ == "__main__":
     print("\n--- Starting Process ---\n")
 
-    # Step 1: Load the input data
     df_references = load_data(INPUT_FILE_PATH)
 
-    # Step 2: Add package IDs and API links
     df_references = add_package_data(df_references)
 
-    # Step 3: Save the updated DataFrame
     save_data(df_references, OUTPUT_FILE_PATH)
 
-    # Step 4: Fetch unique API links (without the API key)
     unique_links = df_references["link"].unique()
     unique_links_without_api_key = [remove_api_key(link) for link in unique_links]
 
-    # Step 5: Fetch detailed bill data
     responses = fetch_bill_data(unique_links_without_api_key)
 
-    # Step 6: Log results
     print(f"\n--- Process Completed ---\n")
     print(f"Successfully fetched data for {len(responses)} bills.")
     print(f"Failed requests are logged in: {LOG_FILE}")

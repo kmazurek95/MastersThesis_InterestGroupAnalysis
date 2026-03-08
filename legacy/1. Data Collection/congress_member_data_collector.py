@@ -3,19 +3,13 @@ import json
 import requests
 from tqdm import tqdm
 
-# ========================= Configuration =========================
-
-# File Paths and API Configuration
 CSV_PATH = "g.members_CREC_114_AND_115.csv"       # Input CSV containing bioguide IDs
-API_KEY = "IgmhiBjvtZhuBDFLlFSYkuGucsP2wKc8it97N4ln"  # Replace with your Congress API key
+API_KEY = "YOUR_API_KEY_HERE"  # Get your API key from https://api.congress.gov/
 LOG_FILE = "failed_requests.log"                 # Log file for failed requests
 OUTPUT_JSON = "responses_pretty.json"            # File to save raw API responses
 OUTPUT_CSV = "bio_data.csv"                      # File to save cleaned data
 
-# API Base URL
 BASE_URL = "https://api.congress.gov/v3/member"
-
-# ========================= Utility Functions =========================
 
 def load_csv(file_path):
     """
@@ -90,35 +84,27 @@ def process_member_data(data):
         print("No data to process.")
         return pd.DataFrame()
 
-    # Normalize JSON into a flat DataFrame
     df = pd.json_normalize(data)
 
-    # Extract and clean required fields
     df['birthYear'] = df['member.birthYear']
     df['cosponsoredLegislationCount'] = df['member.cosponsoredLegislation.count']
     df['partyHistory'] = df['member.partyHistory'].apply(
         lambda x: x[0]['partyName'] if isinstance(x, list) and x else None
     )
 
-    # Handle nested 'terms' field
     print("Exploding and normalizing terms data...")
     df = df.explode('member.terms').reset_index(drop=True)
     terms_df = pd.json_normalize(df['member.terms'])
 
-    # Merge terms back into the main DataFrame
     df = pd.concat([df, terms_df], axis=1).drop(columns=['member.terms'])
 
-    # Filter rows for relevant congress sessions (114 and 115)
     df = df[df['congress'].isin([114, 115])]
 
-    # Rename columns for clarity
     df = df.rename(columns={'member.identifiers.bioguideId': 'bioGuideId'})
     df['i.bioGuideId'] = df['bioGuideId']  # Duplicate column as required
 
     print("Data processing complete.")
     return df
-
-# ========================= Main Script =========================
 
 def main():
     """Main script to fetch, process, and save congress member data."""
@@ -128,7 +114,6 @@ def main():
         print("No data found in the input CSV. Exiting.")
         return
 
-    # Extract unique bioguide IDs
     unique_bioguide_ids = df_references['bioGuideId'].dropna().unique().tolist()
     print(f"Total unique bioguide IDs: {len(unique_bioguide_ids)}")
 
@@ -150,8 +135,6 @@ def main():
     print(f"Failed requests log saved to: {LOG_FILE}")
     print(f"Raw responses saved to: {OUTPUT_JSON}")
     print(f"Final cleaned data saved to: {OUTPUT_CSV}")
-
-# ========================= Script Execution =========================
 
 if __name__ == "__main__":
     main()

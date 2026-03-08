@@ -15,9 +15,6 @@
 # - Saves the results to .csv, .rds, and .md files.
 # - Displays the results in R Markdown.
 
-# --------------------------------------------
-# Load Required Libraries
-# --------------------------------------------
 library(lme4)         # For mixed-effects models
 library(dplyr)        # For data manipulation
 library(forcats)      # For factor manipulation
@@ -28,14 +25,8 @@ library(kableExtra)   # For enhanced table outputs
 library(broom.mixed)  # For extracting model summaries
 library(tidyr)        # For reshaping data
 
-# --------------------------------------------
-# Data Loading and Preprocessing
-# --------------------------------------------
-
-# Load Data
 level1 <- read.csv("level1.csv")
 
-# Clean and preprocess data
 level1 <- level1 %>%
   filter(level1_org_id != 20114287) %>%  # Remove rows with a specific org ID
   mutate(
@@ -45,7 +36,6 @@ level1 <- level1 %>%
     level1_partyHistory = replace(level1_partyHistory, level1_partyHistory == "", NA)
   )
 
-# Validate Dataset
 assert_that(
   all(c("level1_ABBREVCAT", "level1_MSHIP_STATUS11", "saliency_measure") %in% names(level1)),
   noNA(level1$level1_ABBREVCAT),
@@ -53,19 +43,16 @@ assert_that(
   noNA(level1$saliency_measure)
 )
 
-# Confirm expected factor levels
 valid_abbrev_levels <- c("Business Interests", "Non-Business Interests", "Government Interests")
 valid_status_levels <- c("Association", "Other")
 assert_that(all(levels(level1$level1_ABBREVCAT) %in% valid_abbrev_levels))
 assert_that(all(levels(level1$level1_MSHIP_STATUS11) %in% valid_status_levels))
 
-# Helper function for renaming factor levels
 rename_levels <- function(df, column, rename_map) {
   levels(df[[column]]) <- rename_map[levels(df[[column]])]
   df
 }
 
-# Define mappings
 abbrevcat_map <- c(
   "(1) Corporations" = "Corporations",
   "(2) Trade and Business Associations" = "Trade and Business Associations",
@@ -90,11 +77,9 @@ mship_status_map <- c(
   "(9) Can't Tell or DK" = "Can't Tell"
 )
 
-# Apply renaming
 level1 <- rename_levels(level1, "level1_ABBREVCAT", abbrevcat_map)
 level1 <- rename_levels(level1, "level1_MSHIP_STATUS11", mship_status_map)
 
-# Collapse broader categories
 level1 <- level1 %>%
   mutate(
     level1_ABBREVCAT = fct_collapse(
@@ -110,7 +95,6 @@ level1 <- level1 %>%
     )
   )
 
-# Add derived columns
 level1 <- level1 %>%
   mutate(
     mention_year = as.integer(substr(level1_year_week, 1, 4)),
@@ -123,15 +107,9 @@ level1 <- level1 %>%
     ))
   )
 
-# --------------------------------------------
-# Model Fitting
-# --------------------------------------------
-
-# Fit the empty model
 empty_model <- glmer(level1_prominence ~ (1 | level1_org_id) + (1 | level1_issue_area),
                      data = level1, family = binomial)
 
-# Function to fit a model and display results
 fit_and_report <- function(formula, data, model_name) {
   cat("\n--- Fitting", model_name, "---\n")
   
@@ -148,26 +126,18 @@ fit_and_report <- function(formula, data, model_name) {
   list(model = model, BIC = bic, odds_ratios = odds_ratios)
 }
 
-# Fit models
 model1 <- fit_and_report(level1_prominence ~ saliency_category + (1 | level1_org_id) + (1 | level1_issue_area), level1, "Model 1")
 model2 <- fit_and_report(level1_prominence ~ saliency_category + level1_chamber_x + level1_partyHistory + level1_MSHIP_STATUS11 + level1_ABBREVCAT + 
                            (1 | level1_org_id) + (1 | level1_issue_area), level1, "Model 2")
 
-# --------------------------------------------
-# Extract Parameter and Model-Level Statistics
-# --------------------------------------------
-
-# Extract model information
 empty_model_info <- tidy(empty_model) %>% mutate(model = "empty_model")
 model1_info <- tidy(model1$model) %>% mutate(model = "model1")
 model2_info <- tidy(model2$model) %>% mutate(model = "model2")
 
-# Calculate odds ratios
 empty_model_info <- empty_model_info %>% mutate(odds_ratio = exp(estimate))
 model1_info <- model1_info %>% mutate(odds_ratio = exp(estimate))
 model2_info <- model2_info %>% mutate(odds_ratio = exp(estimate))
 
-# Combine parameter-level statistics
 model_info <- bind_rows(empty_model_info, model1_info, model2_info) %>%
   mutate(
     estimate = round(estimate, 2),
@@ -182,7 +152,6 @@ model_info <- bind_rows(empty_model_info, model1_info, model2_info) %>%
   select(-estimate, -std.error, -lower_ci, -upper_ci) %>%
   arrange(model, term)
 
-# Create model-level statistics
 model_level_stats <- tibble(
   term = rep(c("logLik", "AIC", "BIC"), times = 3),
   model = rep(c("empty_model", "model1", "model2"), each = 3),
@@ -195,11 +164,6 @@ model_level_stats <- tibble(
   mutate(estimate = round(estimate, 2)) %>%
   arrange(model, term)
 
-# --------------------------------------------
-# Visualizations
-# --------------------------------------------
-
-# Function to plot odds ratios
 plot_odds_ratios <- function(model, title, file_name) {
   odds_df <- data.frame(
     Term = names(fixef(model$model)),
@@ -214,11 +178,9 @@ plot_odds_ratios <- function(model, title, file_name) {
     ggsave(file_name, width = 8, height = 6)
 }
 
-# Create plots
 plot_odds_ratios(model1, "Odds Ratios from Model 1", "model1_odds_ratios.png")
 plot_odds_ratios(model2, "Odds Ratios from Model 2", "model2_odds_ratios.png")
 
-# Compare BIC values
 bic_values <- data.frame(
   Model = c("Empty Model", "Model 1", "Model 2"),
   BIC = c(BIC(empty_model), model1$BIC, model2$BIC)
@@ -230,11 +192,6 @@ ggplot(bic_values, aes(x = Model, y = BIC, fill = Model)) +
   theme_minimal() +
   ggsave("bic_comparison.png", width = 8, height = 6)
 
-# --------------------------------------------
-# Save Results
-# --------------------------------------------
-
-# Save parameter-level and model-level statistics
 write.csv(model_info, "model_info.csv", row.names = FALSE)
 write.csv(model_level_stats, "model_level_stats.csv", row.names = FALSE)
 

@@ -1,3 +1,4 @@
+import os
 import json
 import pandas as pd
 import re
@@ -5,10 +6,8 @@ from tqdm import tqdm
 from datasketch import MinHash, MinHashLSHForest
 from collections import defaultdict
 
-# Configure pandas to display all columns for better debugging
 pd.set_option('display.max_columns', None)
 
-# **Function to Load Data**
 def load_dataframe(file_path, file_type='csv'):
     """
     Load a dataset from a CSV or JSON file.
@@ -27,7 +26,6 @@ def load_dataframe(file_path, file_type='csv'):
     else:
         raise ValueError("Unsupported file type. Please use 'csv' or 'json'.")
 
-# **Function to Compute Overlapping Variance**
 def compute_overlapping_variance(df):
     """
     Analyze overlapping variations and their unique organization IDs.
@@ -49,7 +47,6 @@ def compute_overlapping_variance(df):
     final_df = pd.merge(variations_org_id, variations_counts, on='variation')
     return final_df
 
-# **Function to Generate MinHash**
 def get_minhash(text):
     """
     Create a MinHash object for a given text.
@@ -65,7 +62,6 @@ def get_minhash(text):
         m.update(s.encode('utf8'))
     return m
 
-# **Function to Detect Potential Duplicates**
 def detect_duplicates(df, org_id1, org_id2, threshold=0.99, num_results=10):
     """
     Detect potential duplicate records between two organization IDs.
@@ -80,24 +76,20 @@ def detect_duplicates(df, org_id1, org_id2, threshold=0.99, num_results=10):
     Returns:
     - defaultdict: Dictionary of potential duplicate observations.
     """
-    # Filter rows for the two specified org_ids
     filtered_df = df[(df['org_id'] == org_id1) | (df['org_id'] == org_id2)]
     all_minhashes = []
     index_to_info = {}
 
-    # Create MinHash objects for each row
     for idx, row in tqdm(filtered_df.iterrows(), total=len(filtered_df), desc="Generating MinHashes"):
         m = get_minhash(row['p1_original'])
         all_minhashes.append((m, row['variation'], row['uuid_paragraph']))
         index_to_info[len(all_minhashes) - 1] = (row['org_id'], row['uuid_paragraph'])
     
-    # Build the LSH Forest for fast similarity search
     forest = MinHashLSHForest(num_perm=128)
     for i, (m, _, _) in enumerate(all_minhashes):
         forest.add(i, m)
     forest.index()
 
-    # Find similar records
     potential_duplicates = defaultdict(list)
     for i, (m, _, _) in enumerate(all_minhashes):
         results = forest.query(m, num_results)
@@ -110,7 +102,6 @@ def detect_duplicates(df, org_id1, org_id2, threshold=0.99, num_results=10):
     
     return potential_duplicates
 
-# **Function to Filter Observations**
 def filter_observations(df, variation_orgId_pairs, variations_to_drop):
     """
     Remove invalid observations based on specific rules.
@@ -142,7 +133,6 @@ def filter_observations(df, variation_orgId_pairs, variations_to_drop):
     print(f"Filtered out {original_shape - df.shape[0]} rows.")
     return df, uuids_filtered_out
 
-# **Function to Save UUIDs**
 def save_uuids(uuids, output_path):
     """
     Save filtered UUIDs to a JSON file.
@@ -155,17 +145,13 @@ def save_uuids(uuids, output_path):
         json.dump(uuids, f)
     print(f"Filtered UUIDs saved to {output_path}")
 
-# **Main Script**
 if __name__ == "__main__":
-    # File paths
-    classified_path = "C:\\Users\\kaleb\\OneDrive\\Desktop\\UVA_RMSS_THESIS_MAZUREK\\Data\\paragraphs_NAME_AND_ACRONYM_114_115_CLASSIFIED.json"
-    output_path = "C:\\Users\\kaleb\\OneDrive\\Desktop\\UVA_RMSS_THESIS_MAZUREK\\Data\\uuids_filtered_out.json"
+    classified_path = os.environ.get("CLASSIFIED_DATA_PATH", os.path.join("data", "paragraphs_NAME_AND_ACRONYM_114_115_CLASSIFIED.json"))
+    output_path = os.environ.get("OUTPUT_DATA_PATH", os.path.join("data", "uuids_filtered_out.json"))
 
-    # Load data
     df_classified_mentions = load_dataframe(classified_path, file_type='json')
     print(f"Loaded {df_classified_mentions.shape[0]} rows.")
 
-    # Filtering rules
     variation_orgId_pairs = [
         ("Pharmaceutical Research and Manufacturers of America", "2839"),
         ("National Association for Surface Finishing", "100359"),
@@ -174,12 +160,10 @@ if __name__ == "__main__":
     ]
     variations_to_drop = ["AACC", "AAI", "USCCB", "AANP", "AAP", "ABS", "ACC", "AMA"]
 
-    # Apply filters
     df_classified_mentions, uuids_filtered_out = filter_observations(
         df_classified_mentions, variation_orgId_pairs, variations_to_drop
     )
 
-    # Save filtered UUIDs
     save_uuids(uuids_filtered_out, output_path)
     print(f"Final DataFrame shape: {df_classified_mentions.shape}")
 
@@ -191,7 +175,6 @@ import numpy as np
 import os
 import json
 
-# **Function to Load Data**
 def read_file(file_path, file_name, mention_index=None, acronym=None, variations_to_exclude=None):
     """
     Load data from a CSV or JSON file, with optional filtering.
@@ -206,10 +189,8 @@ def read_file(file_path, file_name, mention_index=None, acronym=None, variations
     Returns:
     - pd.DataFrame: Filtered DataFrame.
     """
-    # Combine path and file name
     file_path_full = os.path.join(file_path, file_name)
 
-    # Load the file based on its type
     if file_name.endswith('.csv'):
         df = pd.read_csv(file_path_full, low_memory=False)
     elif file_name.endswith('.json'):
@@ -217,7 +198,6 @@ def read_file(file_path, file_name, mention_index=None, acronym=None, variations
     else:
         raise ValueError(f"Unsupported file format: {file_name}. Supported formats are CSV and JSON.")
 
-    # Apply filtering conditions
     if mention_index is not None:
         df = df[df['mention_index'] == mention_index]
     if acronym is not None:
@@ -227,7 +207,6 @@ def read_file(file_path, file_name, mention_index=None, acronym=None, variations
 
     return df
 
-# **Function to Merge Multiple DataFrames**
 def merge_dataframes(file_path, files_to_read, files_to_merge, merge_on_column, mention_index=None, acronym=None, variations_to_exclude=None):
     """
     Merge multiple DataFrames on a common column.
@@ -244,10 +223,8 @@ def merge_dataframes(file_path, files_to_read, files_to_merge, merge_on_column, 
     Returns:
     - pd.DataFrame: Merged DataFrame.
     """
-    # Load all files into a dictionary of DataFrames
     dfs = {file_name: read_file(file_path, file_name, mention_index, acronym, variations_to_exclude) for file_name in files_to_read}
 
-    # Perform the merging process
     if files_to_merge:
         merged_df = dfs[files_to_merge[0]]
         for file_name in files_to_merge[1:]:
@@ -255,7 +232,6 @@ def merge_dataframes(file_path, files_to_read, files_to_merge, merge_on_column, 
         return merged_df
     return dfs
 
-# **Function to Save DataFrame**
 def save_dataframe(df, file_path, file_name, save_as_csv=True, save_as_json=True):
     """
     Save a DataFrame to CSV and/or JSON formats.
@@ -274,7 +250,6 @@ def save_dataframe(df, file_path, file_name, save_as_csv=True, save_as_json=True
         json_path = os.path.join(file_path, f"{file_name}.json")
         df.to_json(json_path, orient='records', lines=True, force_ascii=False)
 
-# **Function to Process Data into a Wide Format**
 def process_dataframe(df, groupby_column, split_column, prefix):
     """
     Transform a DataFrame into a wide format by grouping and splitting data.
@@ -288,17 +263,14 @@ def process_dataframe(df, groupby_column, split_column, prefix):
     Returns:
     - pd.DataFrame: DataFrame in wide format.
     """
-    # Group and split data
     grouped_df = df.groupby(groupby_column)[split_column].apply(lambda x: '|'.join(x.astype(str))).reset_index()
     df_wide = grouped_df[split_column].str.split('|', expand=True)
     df_wide.insert(0, groupby_column, grouped_df[groupby_column])
 
-    # Rename columns for clarity
     for i in range(1, len(df_wide.columns)):
         df_wide.rename(columns={i: f'{prefix}_{i}'}, inplace=True)
     return df_wide
 
-# **Function to Filter Interest Groups**
 def filter_interest_groups(df, conditions):
     """
     Remove interest groups based on specific conditions.
@@ -315,7 +287,6 @@ def filter_interest_groups(df, conditions):
     df = df.drop_duplicates(subset=['org_id'])
     return df
 
-# **Function to Validate DataFrame**
 def validate_dataframe(df, unique_column):
     """
     Check for duplicates and missing values in a DataFrame.
@@ -333,7 +304,6 @@ def validate_dataframe(df, unique_column):
         return False
     return True
 
-# **Function to Add Congress Column**
 def add_congress_column(df, date_column, congress_dates):
     """
     Assign a 'congress' column based on date ranges.
@@ -351,10 +321,8 @@ def add_congress_column(df, date_column, congress_dates):
         df.loc[(df[date_column] >= start_date) & (df[date_column] < end_date), 'congress'] = congress
     return df
 
-# **Main Script**
 if __name__ == "__main__":
-    # File paths and settings
-    file_path = "C:\\Users\\kaleb\\OneDrive\\Desktop\\UVA_RMSS_THESIS_MAZUREK\\Data\\"
+    file_path = os.environ.get("DATA_PATH", os.path.join("data", ""))
     output_file_name = "df_interest_group_prominence_FINAL"
     files_to_read = [
         'paragraphs_NAME_AND_ACRONYM_114_115_CLASSIFIED.json',
@@ -366,19 +334,14 @@ if __name__ == "__main__":
         '115': (pd.to_datetime('2017-01-03'), pd.to_datetime('2019-01-03')),
     }
 
-    # Load and merge data
     dfs = merge_dataframes(file_path, files_to_read, None, merge_column)
 
-    # Filter interest groups
     interest_group_conditions = {'CATEGORY': ['Corporation', 'Local government']}
     df_interest_groups = filter_interest_groups(dfs['paragraphs_NAME_AND_ACRONYM_114_115_CLASSIFIED.json'], interest_group_conditions)
 
-    # Add 'congress' column
     df_interest_groups = add_congress_column(df_interest_groups, 'dateIssued', congress_dates)
 
-    # Validate DataFrame
     if validate_dataframe(df_interest_groups, 'uuid_paragraph'):
         print("Validation passed!")
 
-    # Save the final DataFrame
     save_dataframe(df_interest_groups, file_path, output_file_name)

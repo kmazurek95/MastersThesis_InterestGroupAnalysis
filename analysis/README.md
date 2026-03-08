@@ -1,218 +1,57 @@
-# Analysis: Reproducing Thesis Results
+# Analysis
 
-**Purpose**: Reproducible analysis scripts and notebooks starting from the `multi_level_data` dataset
-
----
-
-## Overview
-
-This directory contains all code needed to reproduce the thesis findings using the validated `multi_level_data` dataset. All analyses start from this dataset—there is no need to collect or process raw data.
-
----
-
-## Structure
-
-```
-analysis/
-├── README.md                                      # This file
-├── 01_Exploratory_Prominence_Analysis.ipynb      # MAIN ANALYSIS - START HERE
-├── 02_Statistical_Models.ipynb                   # Statistical modeling in Python
-└── 03_Multilevel_Models.Rmd                      # R-based GLMM models
-```
-
----
-
-## Quick Start
-
-### Prerequisites
-
-```bash
-# Python environment
-python -m venv venv
-source venv/bin/activate
-pip install pandas numpy scikit-learn matplotlib seaborn jupyter pyarrow
-
-# R environment (for GLMM models)
-# In R console:
-install.packages(c("lme4", "ggplot2", "broom.mixed", "arrow", "dplyr"))
-```
-
-### Run Analysis Notebooks
-
-```bash
-# Navigate to analysis directory
-cd analysis
-
-# Start Jupyter and open the main analysis
-jupyter notebook 01_Exploratory_Prominence_Analysis.ipynb
-
-# Or run all notebooks in order:
-jupyter notebook
-# Then open:
-# 1. 01_Exploratory_Prominence_Analysis.ipynb - Main exploratory analysis
-# 2. 02_Statistical_Models.ipynb - Statistical modeling
-```
-
-### Run R Models
-
-```bash
-# Open in RStudio or render via command line
-Rscript -e "rmarkdown::render('analysis/03_Multilevel_Models.Rmd')"
-```
-
----
+Reproducible analysis scripts starting from the `multi_level_data` dataset.
 
 ## Notebooks
 
 ### 01_Exploratory_Prominence_Analysis.ipynb
 
-**The centerpiece of the portfolio analysis**
-
-- Load and explore the prominence dataset
-- Comprehensive data visualization
-- Descriptive statistics and patterns
-- Initial insights into prominence drivers
-- **START HERE** for understanding the project
+Exploratory analysis of prominence patterns:
+- Concentration and distribution of prominent mentions
+- Top organizations by prominence
+- Partisan patterns in group citations
+- Issue area analysis
 
 ### 02_Statistical_Models.ipynb
 
-**Python-based statistical analysis**
-
-- Fit statistical models in Python
-- Test hypotheses about prominence
-- Model comparisons and diagnostics
-- Visualize model results
+Logistic regression models testing three hypotheses:
+- Model A: Issue salience and strategic communication
+- Model B: Politician characteristics and electoral positioning
+- Model C: Organizational resources and lobbying capacity
 
 ### 03_Multilevel_Models.Rmd
 
-**Advanced R-based analysis**
+Generalized Linear Mixed-Effects Models (GLMM) in R with crossed random effects for organization and policy area. This is the primary inferential analysis from the thesis.
 
-- Generalized Linear Mixed-Effects Models (GLMM)
-- Reproduce thesis findings in R
-- Publication-ready tables
-- Random effects structure analysis
-
-**Key model specification:**
-```r
-model <- glmer(
-    prominent ~
-        lobbying_expenditure + policy_breadth + membership_size +
-        speaker_seniority + speaker_party + policy_salience +
-        (1 | policy_area) + (1 | interest_group_name),
-    data = data,
-    family = binomial
-)
-```
-
----
-
-## Expected Outputs
-
-Running all analyses should generate:
-
-### Figures
-- `fig1_prominence_by_policy_area.png`
-- `fig2_lobbying_expenditure_scatter.png`
-- `fig3_temporal_trends.png`
-- `fig4_model_coefficients.png`
-
-### Tables
-- `table1_descriptive_statistics.csv`
-- `table2_glmm_results.tex`
-- `table3_robustness_checks.html`
-
----
-
-## Validation
-
-To validate that you've reproduced the thesis results:
-
-1. **Compare coefficients**: GLMM coefficients should match thesis Table 3 within rounding error
-2. **Check significance**: Same variables should be significant at p < 0.05
-3. **Verify N**: Sample size should be consistent (check for missing data handling)
-4. **Compare figures**: Visual inspection of plots against thesis figures
-
----
-
-## Extending the Analysis
-
-Want to test new hypotheses? Here's how:
-
-### Adding New Variables
-
-```python
-# Load dataset
-import pandas as pd
-data = pd.read_parquet('../data/multi_level_data/multi_level_data_v1.0.parquet')
-
-# Add new variables
-data['new_variable'] = ...
-
-# Re-run models with new variable
-```
-
-### Alternative Models
-
-```r
-# Try different random effects structure
-model_alt <- glmer(
-    prominent ~ ... + (1 + lobbying_expenditure | policy_area),
-    data = data,
-    family = binomial
-)
-
-# Compare models
-anova(model, model_alt)
-```
-
----
-
-## Reproducibility Checklist
-
-Before publishing results based on these analyses:
-
-- [ ] Loaded data from `multi_level_data_v1.0.parquet`
-- [ ] Documented any data transformations or filtering
-- [ ] Recorded package versions (`sessionInfo()` in R, `pip freeze` in Python)
-- [ ] Saved all outputs with version numbers
-- [ ] Compared results to thesis findings
-- [ ] Noted any deviations or unexpected results
-
----
-
-## Troubleshooting
-
-### Dataset not found
-
-See `../data/multi_level_data/README.md` for access instructions.
-
-### Models won't converge
-
-Try:
-- Scaling continuous variables
-- Simpler random effects structure
-- Different optimizers (`bobyqa`, `nloptwrap`)
-
-### Missing packages
+## Python Dependencies
 
 ```bash
-# Python
-pip install -r requirements.txt
-
-# R
-install.packages(c("lme4", "ggplot2", "broom.mixed", "arrow"))
+pip install -r ../requirements.txt
 ```
 
----
+## R Dependencies
 
-## Contact
+The R Markdown notebook requires:
 
-For questions about reproducing results:
+```r
+install.packages(c(
+  "tidyverse",    # Data manipulation
+  "lme4",         # Mixed-effects models
+  "lmerTest",     # p-values for mixed models
+  "broom.mixed",  # Tidy model outputs
+  "performance",  # Model diagnostics
+  "see",          # Visualization for performance
+  "car",          # Companion to Applied Regression
+  "ggeffects",    # Marginal effects plots
+  "sjPlot",       # Model summary tables
+  "patchwork",    # Plot composition
+  "knitr",        # Report generation
+  "kableExtra",   # Table formatting
+  "gt",           # Publication tables
+  "rmarkdown"     # Rendering
+))
+```
 
-**Kaleb Mazurek**
-- Email: kalebmazurek@gmail.com
-- GitHub: [@kmazurek95](https://github.com/kmazurek95)
+## Data
 
----
-
-**Last Updated**: November 25, 2024
+All notebooks load data from `../data/multi_level_data/`. The main file is `level1_FINAL.csv` (19,165 mentions with 175 variables).

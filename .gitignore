@@ -1,3 +1,6 @@
+# IDE / workspace
+*.code-workspace
+
 # Python
 __pycache__/
 *.py[cod]

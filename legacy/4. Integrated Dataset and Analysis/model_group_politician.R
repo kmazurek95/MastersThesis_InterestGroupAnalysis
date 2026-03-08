@@ -15,36 +15,24 @@
 # - Generates and visualizes key metrics such as odds ratios and BIC comparisons.
 # - Saves the results in multiple formats, including `.csv`, `.rds`, and Markdown tables.
 
-# --------------------------------------------
-# Load Required Libraries
-# --------------------------------------------
-library(lme4)         # Mixed-effects models
-library(MASS)         # Statistical methods
-library(dplyr)        # Data manipulation
-library(knitr)        # Table generation
-library(kableExtra)   # Enhanced table outputs
-library(broom.mixed)  # Model summaries
-library(forcats)      # Factor manipulation
-library(tidyr)        # Data reshaping
-library(ggplot2)      # Data visualization
+library(lme4)
+library(MASS)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+library(broom.mixed)
+library(forcats)
+library(tidyr)
+library(ggplot2)
 
-# --------------------------------------------
-# Data Loading and Preprocessing
-# --------------------------------------------
+data_path <- Sys.getenv("DATA_PATH", file.path(getwd(), "data"))
 
-# Set working directory (update as necessary)
-setwd("C:/Users/kaleb/OneDrive/Desktop/UVA_RMSS_THESIS_MAZUREK/Models/FINAL MODELS/")
-
-# Clear workspace
 rm(list = ls())
 
-# Load data
 level1 <- read.csv("level1.csv")
 
-# Filter out specific organization ID
 level1 <- level1[!level1$level1_org_id == 20114287, ]
 
-# Rename and collapse factor levels for `level1_ABBREVCAT`
 abbrevcat_map <- c(
   "(1) Corporations" = "Corporations",
   "(2) Trade and Business Associations" = "Trade and Business Associations",
@@ -67,7 +55,6 @@ level1$level1_ABBREVCAT <- fct_collapse(
   "Government Interests" = "State and Local Governments"
 )
 
-# Rename and collapse factor levels for `level1_MSHIP_STATUS11`
 mship_status_map <- c(
   "(1) Institution" = "Institution",
   "(2) Association of Individuals" = "Association of Individuals",
@@ -85,7 +72,6 @@ level1$level1_MSHIP_STATUS11 <- fct_collapse(
   "Other" = c("Mixed", "Other", "Can't Tell")
 )
 
-# Add derived columns
 level1 <- level1 %>%
   mutate(
     mention_year = as.integer(substr(level1_year_week, 1, 4)),
@@ -98,30 +84,18 @@ level1 <- level1 %>%
     ))
   )
 
-# --------------------------------------------
-# Model Fitting
-# --------------------------------------------
-
-# Fit the empty model
 empty_model <- glmer(level1_prominence ~ (1 | level1_org_id) + (1 | level1_issue_area),
                      data = level1, family = binomial)
 
-# Fit Model 1
 model1 <- glmer(level1_prominence ~ level1_issue_maximal_overlap + term_status +
                   level1_bills_sponsored + level1_seniority + (1 | level1_org_id) + (1 | level1_issue_area),
                 data = level1, family = binomial)
 
-# Fit Model 2
 model2 <- glmer(level1_prominence ~ level1_issue_maximal_overlap + term_status +
                   level1_bills_sponsored + level1_seniority + level1_chamber_x + level1_partyHistory +
                   level1_MSHIP_STATUS11 + level1_ABBREVCAT + (1 | level1_org_id) + (1 | level1_issue_area),
                 data = level1, family = binomial)
 
-# --------------------------------------------
-# Extract Parameter and Model-Level Statistics
-# --------------------------------------------
-
-# Extract model information
 model_info <- bind_rows(
   tidy(empty_model) %>% mutate(model = "Empty Model"),
   tidy(model1) %>% mutate(model = "Model 1"),
@@ -140,7 +114,6 @@ model_info <- bind_rows(
   ) %>%
   select(model, term, odds_ratio, statistic, p.value, confidence_interval)
 
-# Model-level statistics
 model_level_stats <- tibble(
   term = rep(c("logLik", "AIC", "BIC"), each = 3),
   model = c("Empty Model", "Model 1", "Model 2"),
@@ -151,18 +124,12 @@ model_level_stats <- tibble(
   )
 )
 
-# --------------------------------------------
-# Save Results and Visualizations
-# --------------------------------------------
-
-# Save results
 write.csv(model_info, "model_info_model_b.csv", row.names = FALSE)
 write.csv(model_level_stats, "model_level_stats_model_b.csv", row.names = FALSE)
 
 saveRDS(model_info, "model_info_model_b.rds")
 saveRDS(model_level_stats, "model_level_stats_model_b.rds")
 
-# Visualize BIC comparisons
 ggplot(model_level_stats, aes(x = model, y = estimate, fill = term)) +
   geom_bar(stat = "identity", position = "dodge") +
   labs(title = "Model-Level Statistics (AIC, BIC, logLik)", x = "Model", y = "Estimate") +
