@@ -1,35 +1,31 @@
 # Interest Group Prominence in Congressional Speech
 
-MSc Thesis, University of Amsterdam, 2024
+MSc Thesis — University of Amsterdam, 2023
 
-I studied why some advocacy organizations get recognized as authoritative voices in U.S. congressional floor speeches while others are mentioned only in passing. Using NLP text classification and multilevel regression models, I analyzed prominence patterns across the 114th and 115th Congress.
+**[Read the full thesis (PDF)](docs/Thesis_UvA_Kaleb_Mazurek.pdf)**
+
+I studied why some advocacy organizations are treated as authoritative voices in U.S. congressional floor speeches while others are mentioned only in passing. Using NLP text classification and multilevel regression models, I analyzed prominence patterns across the 114th and 115th Congress (2015–2019).
 
 ## Key Findings
 
-- Lobbying expenditure and broad policy engagement strongly predict whether a group is cited as an authority
-- Medium-salience policy areas show higher advocacy visibility than high-salience ones
-- Politician seniority has an unexpected negative effect on prominence
-- The top 5% of organizations account for over 50% of all prominent mentions
-
-## Thesis Documents
-
-| Document | Description |
-|----------|-------------|
-| [Full Thesis (PDF)](legacy/5.%20Visualization%20and%20Reporting/Thesis_UvA_Kaleb_Mazurek.pdf) | Complete thesis manuscript |
+- The top 1% of organizations account for ~31% of all prominent mentions. Prominence is heavily concentrated.
+- Organizations using external lobbyists had significantly higher prominence odds (p = 0.001), contradicting the expectation that outsourcing advocacy signals weak leadership.
+- Medium-salience policy areas show higher prominence than high-salience ones. Crowded issue spaces appear to dilute individual group visibility.
+- Politician seniority has a small but significant negative effect on affording prominence, counter to the intuition that longer-serving members have stronger group relationships.
 
 ## Data
 
-- ~20,699 mentions of interest groups in congressional floor speeches (pre-filtering total)
-- Analytical sample: 19,165 mentions after dropping cases with undetermined policy areas
-- 5,323 organizations from the Washington Representatives Study
-- 114th and 115th Congress (2015-2019)
-- Full-sample design: includes organizations with zero mentions as the baseline
+- ~78,000 Congressional Record documents (114th–115th Congress)
+- 5,447 organizations from the Washington Representatives Study (2011)
+- ~20,699 mention passages extracted, 19,165 in the analytical sample
+- Full-sample design: includes organizations with zero mentions as baseline
 
 ## Methods
 
-- Text classification: Naive Bayes / SVM (F1 = 0.79)
-- Statistical models: Generalized Linear Mixed-Effects Models (GLMMs) in R
-- Random effects: Organization and Policy Area
+- Text classification: SVM with count vectorization (F1 = 0.79, accuracy ~81%, ROC AUC 0.72)
+- Statistical models: Generalized Linear Mixed-Effects Models (GLMMs) in R (lme4)
+- Random effects: Organization and Policy Area (crossed)
+- Training data: 1,000 hand-coded passages following Fraussen et al. (2018) coding scheme
 
 ## Analysis Notebooks
 
@@ -62,7 +58,7 @@ Data files are tracked with Git LFS. Run `git lfs pull` if CSVs appear as pointe
 
 ## Related Work
 
-A modernized re-implementation of this pipeline with improved extraction and classification (F1 = 0.91, kappa = 0.84) is available at [ThesisPipelineRework](https://github.com/kmazurek95/ThesisPipelineRework).
+A modernized re-implementation of this pipeline with improved extraction and classification (F1 = 0.91, Cohen's kappa = 0.82) is available at [ThesisPipelineRework](https://github.com/kmazurek95/ThesisPipelineRework).
 
 ## Citation
 
