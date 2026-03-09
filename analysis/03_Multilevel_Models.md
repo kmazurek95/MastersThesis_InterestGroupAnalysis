@@ -1,5 +1,4 @@
-Whose Voice Counts? Understanding Advocacy Group Prominence in
-Congressional Discourse
+Multilevel Models: Interest Group Prominence in Congressional Speech
 ================
 Kaleb Mazurek
 March 09, 2026
@@ -8,37 +7,16 @@ March 09, 2026
 - [Setup and Data Loading](#setup-and-data-loading)
   - [Load and Preprocess Data](#load-and-preprocess-data)
   - [Data Overview](#data-overview)
-- [Model A: Public Salience and Strategic Voice
-  Amplification](#model-a-public-salience-and-strategic-voice-amplification)
-  - [The Strategic Communication
-    Hypothesis](#the-strategic-communication-hypothesis)
-    - [Research Question](#research-question)
-    - [Theoretical Expectations](#theoretical-expectations)
-    - [Why This Matters for Democratic
-      Representation](#why-this-matters-for-democratic-representation)
-    - [Measurement](#measurement)
+- [Model A: Issue Salience](#model-a-issue-salience)
   - [Model A: Empty Model](#model-a-empty-model)
   - [Model A1: Saliency Category Only](#model-a1-saliency-category-only)
   - [Model A2: Full Model with
     Controls](#model-a2-full-model-with-controls)
   - [Model A: Comparison](#model-a-comparison)
   - [Visualization: Model A Results](#visualization-model-a-results)
-  - [Policy Implications: Model A
-    Findings](#policy-implications-model-a-findings)
-    - [Key Findings](#key-findings)
-    - [What This Means for Democratic
-      Representation](#what-this-means-for-democratic-representation)
-    - [Implications for Committee
-      Specialization](#implications-for-committee-specialization)
-- [Model B: Legislative Signaling and Electoral
-  Positioning](#model-b-legislative-signaling-and-electoral-positioning)
-  - [The Politician-Group Linkage
-    Hypothesis](#the-politician-group-linkage-hypothesis)
-    - [Research Question](#research-question-1)
-    - [Theoretical Expectations](#theoretical-expectations-1)
-    - [Why This Matters for
-      Representation](#why-this-matters-for-representation)
-    - [Measurement](#measurement-1)
+  - [Interpretation: Model A](#interpretation-model-a)
+  - [Model B: Politician
+    Characteristics](#model-b-politician-characteristics)
   - [Model B: Empty Model](#model-b-empty-model)
   - [Model B1: Politician
     Characteristics](#model-b1-politician-characteristics)
@@ -46,23 +24,9 @@ March 09, 2026
     Controls](#model-b2-full-model-with-controls)
   - [Model B: Comparison](#model-b-comparison)
   - [Visualization: Model B Results](#visualization-model-b-results)
-  - [Policy Implications: Model B
-    Findings](#policy-implications-model-b-findings)
-    - [Key Findings](#key-findings-1)
-    - [What This Means for Democratic
-      Representation](#what-this-means-for-democratic-representation-1)
-    - [Implications for Understanding Legislative
-      Communication](#implications-for-understanding-legislative-communication)
-- [Model C: Organizational Resources and the Pluralist
-  Question](#model-c-organizational-resources-and-the-pluralist-question)
-  - [The Resource Mobilization
-    Hypothesis](#the-resource-mobilization-hypothesis)
-    - [Research Question](#research-question-2)
-    - [Theoretical Expectations](#theoretical-expectations-2)
-    - [Why This Matters for Pluralism and Democratic
-      Voice](#why-this-matters-for-pluralism-and-democratic-voice)
-    - [Measurement](#measurement-2)
-    - [The Democratic Stakes](#the-democratic-stakes)
+  - [Interpretation: Model B](#interpretation-model-b)
+  - [Model C: Organizational
+    Resources](#model-c-organizational-resources)
   - [Model C: Empty Model](#model-c-empty-model)
   - [Model C1: Organizational
     Characteristics](#model-c1-organizational-characteristics)
@@ -70,13 +34,7 @@ March 09, 2026
     Controls](#model-c2-full-model-with-controls)
   - [Model C: Comparison](#model-c-comparison)
   - [Visualization: Model C Results](#visualization-model-c-results)
-  - [Policy Implications: Model C
-    Findings](#policy-implications-model-c-findings)
-    - [Key Findings](#key-findings-2)
-    - [What This Means for Democratic
-      Pluralism](#what-this-means-for-democratic-pluralism)
-    - [Pluralist Theory Implications](#pluralist-theory-implications)
-    - [Representation Gaps to Explore](#representation-gaps-to-explore)
+  - [Interpretation: Model C](#interpretation-model-c)
 - [Overall Results Summary](#overall-results-summary)
   - [Cross-Model Comparison](#cross-model-comparison)
   - [Visualization: Model Fit
@@ -569,64 +527,18 @@ table(level1$level1_partyHistory, useNA = "ifany") %>% print()
 
 ------------------------------------------------------------------------
 
-# Model A: Public Salience and Strategic Voice Amplification
+# Model A: Issue Salience
 
-## The Strategic Communication Hypothesis
-
-When do legislators invoke advocacy organizations as authoritative
-voices? Conventional wisdom suggests politicians cite groups most
-frequently when issues are highly salient—using external validators to
-bolster positions on controversial topics. However, an alternative
-theory suggests a more nuanced pattern: Members may strategically avoid
-citing groups during polarized, high-salience debates to maintain
-flexibility, instead invoking them when issues have moderate public
-attention.
-
-### Research Question
-
-**Are interest groups mentioned in policy areas of high salience more
-likely to receive prominent citations (recognition as authoritative
-voices) from legislators?**
-
-### Theoretical Expectations
-
-**H1a (Linear Salience)**: Groups mentioned in high-salience policy
-areas have higher probability of prominent mention, as members seek
-external credibility on visible issues.
-
-**H1b (Curvilinear Salience)**: Groups mentioned in medium-salience
-policy areas have highest probability of prominence. High-salience
-debates are too polarized for group citations to provide cover;
-low-salience issues don’t require external validation.
-
-### Why This Matters for Democratic Representation
-
-The relationship between issue salience and group prominence reveals
-whether:
-
-- **Public attention drives elite discourse**: Do legislators amplify
-  group voices when citizens are watching?
-- **Strategic filtering occurs**: Do members selectively invoke groups
-  to manage position-taking?
-- **Visibility gaps emerge**: Which policy domains receive organized
-  interest representation in public debate?
-
-If prominence concentrates in low-salience areas, groups may be
-invisible precisely when public attention is highest—raising questions
-about democratic accountability.
-
-### Measurement
-
-- **Dependent Variable**: `level1_prominence` (1 = prominent mention, 0
-  = passing mention)
-- **Key Independent Variable**: `saliency_category` (low/medium/high)
-  based on Google Trends data for policy areas
-- **Controls**: Chamber, party, organization type, membership structure
+Are interest groups mentioned in high-salience policy areas more likely
+to be cited as authoritative voices? Salience is measured via Google
+Trends data aggregated by CAP policy domain into low, medium, and high
+terciles. The thesis hypothesized a linear relationship (higher salience
+= more prominence), but the results suggest something more complicated.
 
 ## Model A: Empty Model
 
 ``` r
-# Fit empty model once — identical formula reused for all three model sets
+# Fit empty model once (identical formula reused for all three model sets)
 empty_model <- glmer(
   level1_prominence ~ 1 + (1 | level1_org_id) + (1 | level1_issue_area),
   data = level1,
@@ -1459,134 +1371,32 @@ plot(pred_a, show_data = FALSE) +
 
 ![](03_Multilevel_Models_files/figure-gfm/viz-predicted-probs-a-1.png)<!-- -->
 
-## Policy Implications: Model A Findings
+## Interpretation: Model A
 
-The results from Model A reveal a **prominence paradox**: contrary to
-expectations, advocacy groups are not more likely to be cited as
-authoritative voices during high-salience policy debates. Instead, we
-observe:
+Medium-salience policy areas predict prominence better than
+high-salience areas, which was unexpected. One possibility is that
+high-salience issues attract so many competing voices that individual
+group visibility gets diluted. In medium-salience domains, the field is
+less crowded and individual organizations can more easily become the
+go-to reference. This is consistent with the concentration patterns from
+the exploratory analysis.
 
-### Key Findings
-
-1.  **Medium-salience advantage**: Groups mentioned in moderately
-    salient policy areas show increased odds of prominent mention (OR \>
-    1.0), suggesting legislators strategically invoke organizations when
-    issues have visibility but aren’t fully polarized.
-
-2.  **High-salience penalty**: Groups mentioned during highly salient
-    debates show decreased prominence odds, indicating members may avoid
-    public group citations when issues are most controversial.
-
-3.  **Low-salience baseline**: Groups in low-attention policy areas
-    serve as the reference category, with moderate prominence rates.
-
-### What This Means for Democratic Representation
-
-**For advocacy organizations**:
-
-- Achieving symbolic recognition may be easier in specialized policy
-  domains with moderate public attention than in headline-grabbing
-  debates
-- Organizations focused on “under-the-radar” issues may struggle to gain
-  visibility even when mentioned
-- Strategic targeting of medium-salience moments could increase
-  prominence
-
-**For legislative transparency**:
-
-- The groups the public hears about may not be those most active on the
-  issues citizens care most about
-- High-salience debates may lack visible markers of organized interest
-  representation
-- Media coverage of legislative debate may underestimate group
-  involvement in controversial areas
-
-**For pluralist theory**:
-
-- If prominence concentrates in medium-salience domains, we may observe
-  systematic visibility gaps
-- Public understanding of “who’s at the table” may diverge from actual
-  lobbying activity
-- Symbolic representation in discourse may follow different logics than
-  private access
-
-### Implications for Committee Specialization
-
-These patterns likely reflect the institutional structure of Congress.
-Members on specialized committees may cite groups more prominently in
-their jurisdiction areas, which tend to be medium-salience (e.g.,
-agriculture, transportation). High-salience issues (healthcare,
-immigration) often transcend committee boundaries, making group
-citations less strategically useful.
+The committee specialization story is worth noting: members on
+specialized committees may cite groups more prominently in their
+jurisdiction areas, which tend to be medium-salience (agriculture,
+transportation, energy). High-salience issues like healthcare and
+immigration cut across committee boundaries, making any single group
+citation less strategically useful.
 
 ------------------------------------------------------------------------
 
-# Model B: Legislative Signaling and Electoral Positioning
+## Model B: Politician Characteristics
 
-## The Politician-Group Linkage Hypothesis
-
-Why do some legislators frequently cite advocacy groups while others
-rarely do? Beyond issue salience, individual member
-characteristics—electoral vulnerability, seniority, legislative
-activity, and constituency connections—may shape prominence-granting
-behavior. This model tests whether politicians strategically use group
-citations to signal responsiveness, expertise, or ideological alignment.
-
-### Research Question
-
-**How do politician characteristics (reelection incentives, policy
-alignment, seniority, legislative activity) affect the likelihood of
-affording prominence to interest groups?**
-
-### Theoretical Expectations
-
-Drawing on theories of legislative behavior and position-taking (Mayhew,
-1974), we expect:
-
-**H2a (Electoral Cycle)**: Members in their first year or year before
-term end are more likely to cite groups prominently, using them to
-signal constituency responsiveness or build credibility for reelection.
-
-**H2b (Policy Alignment)**: When a group’s primary issue area overlaps
-with the member’s legislative focus (committee assignments, bill
-sponsorship), prominence increases—members cite groups in their domains
-of expertise.
-
-**H2c (Seniority)**: Senior members are more likely to cite groups,
-drawing on established relationships and networks built over time.
-
-**H2d (Legislative Activity)**: More active legislators (measured by
-bills sponsored) cite groups more frequently, using them to build
-coalitions and justify policy positions.
-
-### Why This Matters for Representation
-
-Understanding politician-group linkages reveals:
-
-- **Electoral accountability**: Do members invoke groups strategically
-  around elections, or is prominence independent of electoral cycles?
-- **Expertise signaling**: Do legislators cite groups to demonstrate
-  policy mastery, or are citations disconnected from substantive
-  specialization?
-- **Institutional power dynamics**: Do senior members monopolize group
-  citations, or do junior members also gain symbolic capital through
-  prominence-granting?
-
-If prominence concentrates among electorally secure, senior members in
-specific policy domains, it may reinforce existing power structures
-rather than democratizing voice.
-
-### Measurement
-
-- **Dependent Variable**: `level1_prominence` (1 = prominent mention, 0
-  = passing mention)
-- **Key Independent Variables**:
-  - `term_status`: First year, year before term end, or other
-  - `level1_issue_maximal_overlap`: Whether group’s primary issue
-    matches member’s focus
-  - `level1_seniority`: Years in Congress
-  - `level1_bills_sponsored`: Legislative activity level
-- **Controls**: Chamber, party, organization type, membership structure
+Do politician-level factors (seniority, party, chamber, legislative
+activity) predict whether they cite interest groups as authoritative
+voices? Model B tests variables from the politician side of the
+prominence dynamic, controlling for the same organizational and
+institutional factors as Model A.
 
 ## Model B: Empty Model
 
@@ -2663,160 +2473,33 @@ plot(pred_b_seniority, show_data = FALSE) +
 
 ![](03_Multilevel_Models_files/figure-gfm/viz-seniority-effect-1.png)<!-- -->
 
-## Policy Implications: Model B Findings
+## Interpretation: Model B
 
-Model B reveals **counterintuitive patterns** in how politician
-characteristics shape group prominence, challenging conventional wisdom
-about legislative-interest group relationships.
+The seniority finding ran counter to expectations. More senior
+legislators are slightly less likely to afford prominence to advocacy
+groups, contradicting the intuition that longer-serving members would
+have more established group relationships. One explanation: senior
+members have enough personal credibility that they don’t need external
+validators. They chair committees and shape policy directly rather than
+through public citations.
 
-### Key Findings
-
-1.  **Seniority penalty**: More senior legislators are *less* likely to
-    afford prominence to advocacy groups, contrary to expectations. Each
-    additional year in Congress decreases the odds of prominent citation
-    (OR \< 1.0).
-
-2.  **Issue overlap matters (weakly)**: Groups mentioned in policy areas
-    aligned with a member’s legislative focus show slightly increased
-    prominence, but the effect is modest.
-
-3.  **Electoral cycle irrelevance**: Members in their first year or
-    final year before reelection show no significant difference in
-    prominence-granting compared to other years.
-
-4.  **Legislative activity shows mixed effects**: Bill sponsorship
-    activity has minimal impact on group citation patterns.
-
-### What This Means for Democratic Representation
-
-**The Seniority Paradox**
-
-The negative relationship between seniority and group prominence
-challenges assumptions about how institutional power shapes advocacy:
-
-- **Independence hypothesis**: Senior members may have sufficient
-  personal credibility that they don’t need external validators. They
-  cite groups less because they *can*.
-- **Network atrophy**: Long-serving members may have older networks that
-  don’t include newer advocacy organizations gaining prominence.
-- **Committee power**: Senior members chair committees and
-  subcommittees, allowing them to shape policy directly rather than
-  through public citations.
-
-**Implications for advocacy strategy**: - Targeting junior members for
-symbolic recognition may be more effective than focusing on committee
-chairs - Senior members’ influence operates through channels other than
-public group citations - New organizations may find it easier to gain
-prominence from newer legislators
-
-**Electoral Independence**
-
-The lack of electoral cycle effects suggests: - Group prominence is
-*not* primarily driven by reelection positioning - Members don’t
-strategically ramp up citations before elections - Prominence operates
-through different mechanisms than electoral credit-claiming
-
-This finding supports the view that prominence reflects genuine policy
-engagement rather than pure position-taking.
-
-**Policy Specialization (Weak Signal)**
-
-The modest effect of issue overlap suggests: - Members do cite groups
-somewhat more in their areas of expertise - But specialization alone
-doesn’t explain prominence patterns - Other factors (party, organization
-type) may matter more
-
-### Implications for Understanding Legislative Communication
-
-These patterns reveal that **prominence is not simply about access or
-influence**. If it were, we’d expect: - Senior members (with more
-access) to cite groups more → We see the opposite - Electoral
-vulnerability to drive citations → We see no effect - Issue expertise to
-strongly predict citations → We see weak effects
-
-Instead, prominence appears to be a distinct form of symbolic politics
-with its own logics.
+The null findings are informative. Electoral cycle timing, bill
+sponsorship, and issue overlap do not clearly predict
+prominence-granting behavior. This suggests that the politician side of
+the prominence dynamic is less systematic than theoretical models
+assume, or that the relevant politician-level factors haven’t been
+identified yet. The weak issue overlap effect suggests members do cite
+groups somewhat more in their areas of expertise, but specialization
+alone doesn’t explain the pattern.
 
 ------------------------------------------------------------------------
 
-# Model C: Organizational Resources and the Pluralist Question
+## Model C: Organizational Resources
 
-## The Resource Mobilization Hypothesis
-
-Does legislative prominence follow the same patterns as other forms of
-interest group success? Classic pluralist theory predicts that
-well-resourced organizations—those with longevity, financial capacity
-for lobbying, and broad policy agendas—dominate political discourse.
-Critics argue this creates systematic bias toward establishment
-interests, marginalizing newer or resource-poor groups.
-
-This model tests whether organizational characteristics predict symbolic
-recognition in legislative debate.
-
-### Research Question
-
-**How do organizational attributes (age, lobbying capacity, policy
-breadth) predict the likelihood of receiving prominent mentions from
-legislators?**
-
-### Theoretical Expectations
-
-**H3a (Organizational Maturity)**: Older organizations have higher
-probability of prominence. Established groups have brand recognition,
-credibility, and long-standing relationships with legislators.
-
-**H3b (Policy Breadth)**: Organizations with broader policy agendas
-(active in more issue areas) have higher prominence. Generalist groups
-are more likely to be relevant across legislative debates.
-
-**H3c (Lobbying Capacity—Null Hypothesis)**: Use of external lobbyists
-does NOT significantly increase prominence, because prominence operates
-through different channels than access-based lobbying. Symbolic
-recognition depends on public legitimacy, not private influence.
-
-### Why This Matters for Pluralism and Democratic Voice
-
-Organizational characteristics reveal whether prominence reinforces or
-challenges existing power structures:
-
-**Resource bias concerns**: - If only established, well-funded
-organizations gain prominence, symbolic power mirrors material
-advantages - Newer social movements or grassroots organizations may be
-systematically excluded from legislative discourse - The “chorus of
-voices” in democratic debate may be less diverse than group population
-
-**Pluralist vs. elite theory**: - **Pluralist prediction**: Prominence
-distributed across diverse organizations regardless of resources -
-**Elite/neo-pluralist prediction**: Prominence concentrates among
-business groups, trade associations, and established interests
-
-**Implications for advocacy**: - Do groups need lobbying infrastructure
-to gain visibility, or can they achieve prominence through other
-means? - Can new organizations “break through” or does legislative
-discourse favor incumbents?
-
-### Measurement
-
-- **Dependent Variable**: `level1_prominence` (1 = prominent mention, 0
-  = passing mention)
-- **Key Independent Variables**:
-  - `level1_YEARS_EXISTED`: Organizational age (years since founding)
-  - `level1_OUTSIDE11`: Use of external lobbyists (binary)
-  - `unique_issue_areas`: Count of distinct policy areas where
-    organization is active
-- **Controls**: Chamber, party, organization type
-  (business/non-business/government), membership structure
-
-### The Democratic Stakes
-
-If organizational resources strongly predict prominence, it suggests: -
-Symbolic representation follows material power - Public legislative
-discourse may be less diverse than actual advocacy landscape - Policy
-debates may systematically amplify certain voices while silencing others
-
-Conversely, if resources have weak effects, it suggests prominence
-operates through legitimacy, constituency connections, or issue urgency
-rather than lobbying capacity.
+Do organizational characteristics (age, lobbying expenditure, policy
+scope, use of external lobbyists) predict prominence? Model C tests
+whether well-resourced organizations dominate legislative discourse, as
+classic pluralist theory predicts.
 
 ## Model C: Empty Model
 
@@ -3768,93 +3451,28 @@ plot(pred_c_lobbyist, show_data = FALSE) +
 
 ![](03_Multilevel_Models_files/figure-gfm/viz-lobbyist-effect-1.png)<!-- -->
 
-## Policy Implications: Model C Findings
+## Interpretation: Model C
 
-Model C provides **crucial evidence about resource bias** in legislative
-discourse, with surprising implications for pluralist theory and
-democratic representation.
+The external lobbyist finding was the most surprising result. I
+hypothesized that reliance on external lobbyists would not significantly
+increase prominence, following Grossmann’s (2012) argument that
+outsourcing advocacy signals weak internal capacity. The opposite held:
+organizations employing external lobbyists had significantly higher
+prominence odds (p = 0.001). Professional intermediaries appear to play
+a meaningful role in positioning organizations within legislative
+discourse.
 
-### Key Findings
+Organizational age showed no significant effect, which challenges the
+assumption that longevity translates to being treated as a prominent
+voice. Whatever drives prominence, it is not simply a matter of having
+been around for a long time. Policy breadth showed a positive but
+non-significant trend, suggesting that a broader agenda creates more
+intersections with legislative debate but doesn’t guarantee prominent
+treatment.
 
-1.  **Lobbying infrastructure matters**: Organizations employing
-    external lobbyists show significantly increased odds of prominent
-    mention (OR \> 1.0), contrary to the null hypothesis. However, the
-    effect is moderate, not dominant.
-
-2.  **Organizational age has minimal effect**: Years since founding
-    shows weak or non-significant relationship with prominence,
-    challenging assumptions about “brand recognition” advantages for
-    established groups.
-
-3.  **Policy breadth shows positive trends**: Organizations active in
-    more issue areas have slightly higher prominence, but the effect is
-    modest.
-
-4.  **Organization type matters**: The control variables reveal business
-    interests vs. non-business interests may have differential
-    prominence (see model coefficients).
-
-### What This Means for Democratic Pluralism
-
-**The Lobbying-Prominence Link**
-
-Finding that external lobbyists increase prominence has important
-implications:
-
-- **Integrated advocacy**: Organizations combining inside (lobbying) and
-  outside (public discourse) strategies may be most effective
-- **Resource advantages persist**: Groups that can afford professional
-  lobbyists gain both access *and* visibility
-- **But prominence ≠ captured**: The moderate effect size suggests
-  symbolic recognition isn’t simply “bought”
-
-**Implications for lobbying reform debates**: - Disclosure requirements
-could help reveal which organizations gain dual advantages (access +
-prominence) - Symbolic power may be more distributed than material
-power, but correlation exists - Public financing of advocacy could help
-level the visibility playing field
-
-**Challenging the “Establishment Advantage” Narrative**
-
-The weak effect of organizational age is striking:
-
-- **New groups can break through**: Recent organizations aren’t
-  systematically excluded from prominence
-- **Legitimacy over longevity**: What matters may be constituency
-  representation, not historical presence
-- **Dynamic advocacy landscape**: Legislative discourse may adapt to
-  emerging groups faster than expected
-
-**For emerging advocacy organizations**: You don’t need decades of
-history to gain symbolic recognition—you need constituency legitimacy
-and strategic positioning.
-
-**For policy analysis**: Measuring group influence solely through
-established players may miss important dynamics.
-
-### Pluralist Theory Implications
-
-These findings suggest a **nuanced pluralist picture**:
-
-**Supporting pluralism**: - Age doesn’t determine prominence (low
-barriers to entry) - Effect sizes are moderate, not deterministic -
-Multiple pathways to visibility exist
-
-**Challenging pluralism**: - Lobbying capacity provides advantages -
-Professional infrastructure correlates with symbolic power - Resource
-mobilization still matters
-
-**The verdict**: Prominence is *more pluralist* than traditional
-influence, but *not fully pluralist*. Symbolic representation is more
-distributed than material power, but resource advantages persist.
-
-### Representation Gaps to Explore
-
-Future research should examine: - **Which specific organization types
-gain prominence?** (Business vs. labor vs. identity groups vs. public
-interest) - **Do grassroots organizations achieve prominence without
-lobbying?** (Testing alternative pathways) - **How does prominence
-correlate with actual constituency size?** (Representativeness question)
+The overall picture from all three model sets: prominence is driven more
+by organizational positioning and the structure of the policy
+environment than by the characteristics of individual politicians.
 
 ------------------------------------------------------------------------
 
@@ -4312,6 +3930,15 @@ These patterns distinguish prominence from lobbying access and policy
 influence as a separate dimension of interest group success (extending
 Grossmann, 2012; Halpin & Fraussen, 2017).
 
+**Hypothesis mapping**: Model A partially supports H1: medium salience
+predicts prominence, but high salience reduces it rather than increasing
+it. Model B partially supports H2: seniority is significant but in the
+opposite direction from what was predicted. Model C rejects the null
+H3c: external lobbyists do significantly predict prominence (p = 0.001),
+contradicting the hypothesis that they would have no effect. Full
+hypothesis statements and theoretical grounding are in the thesis
+document.
+
 ## Limitations
 
 - Congressional Record captures floor speeches only, not committee
@@ -4419,4 +4046,4 @@ University Press.
 
 ------------------------------------------------------------------------
 
-**Document compiled**: March 09, 2026 at 11:16 AM
+**Document compiled**: March 09, 2026 at 02:56 PM
