@@ -2,7 +2,11 @@
 title: "Whose Voice Counts? Understanding Advocacy Group Prominence in Congressional Discourse"
 author: "Kaleb Mazurek"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
+always_allow_html: true
 output:
+  github_document:
+    toc: true
+    html_preview: false
   html_document:
     toc: true
     toc_depth: 3
@@ -12,9 +16,6 @@ output:
     highlight: tango
     code_folding: show
     df_print: paged
-  pdf_document:
-    toc: true
-    number_sections: true
 ---
 
 ```{r setup, include=FALSE}
@@ -1165,6 +1166,8 @@ The three model sets converge on a finding that prominence operates through diff
 - **Moderate resource effects**: External lobbyists increase prominence odds, but organizational age has minimal effect. Newer groups can break through.
 
 These patterns distinguish prominence from lobbying access and policy influence as a separate dimension of interest group success (extending Grossmann, 2012; Halpin & Fraussen, 2017).
+
+**Hypothesis mapping**: These findings map to the thesis hypotheses as follows: Model A partially supports H1 — medium salience predicts prominence, but high salience reduces it rather than increasing it. Model B partially supports H2 — seniority is significant but in the opposite direction from what was predicted. Model C rejects the null H3c — external lobbyists do significantly predict prominence (p = 0.001), contradicting the hypothesis that they would have no effect. Full hypothesis statements and theoretical grounding are in the thesis document.
 
 ## Limitations
 

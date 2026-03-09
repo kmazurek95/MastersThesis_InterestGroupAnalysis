@@ -64,13 +64,6 @@ data/external/**
 !data/interim/.gitkeep
 !data/external/.gitkeep
 
-# Outputs (generated, not version controlled)
-outputs/**
-!outputs/README.md
-!outputs/figures/.gitkeep
-!outputs/tables/.gitkeep
-!outputs/models/.gitkeep
-
 # Logs
 logs/
 *.log

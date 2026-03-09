@@ -16,11 +16,11 @@ I studied why some advocacy organizations get recognized as authoritative voices
 | Document | Description |
 |----------|-------------|
 | [Full Thesis (PDF)](legacy/5.%20Visualization%20and%20Reporting/Thesis_UvA_Kaleb_Mazurek.pdf) | Complete thesis manuscript |
-| [Technical Report (PDF)](legacy/5.%20Visualization%20and%20Reporting/Technical%20Report%20MA%20Thesis.pdf) | Methodology and implementation details |
 
 ## Data
 
-- ~20,699 mentions of interest groups in congressional floor speeches
+- ~20,699 mentions of interest groups in congressional floor speeches (pre-filtering total)
+- Analytical sample: 19,165 mentions after dropping cases with undetermined policy areas
 - 5,323 organizations from the Washington Representatives Study
 - 114th and 115th Congress (2015-2019)
 - Full-sample design: includes organizations with zero mentions as the baseline
