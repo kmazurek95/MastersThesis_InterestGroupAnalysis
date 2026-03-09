@@ -138,6 +138,7 @@ CONTRIBUTING.md
 
 # R generated files
 *.html
+!analysis/*.html
 *_files/
 *_cache/
 
