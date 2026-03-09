@@ -133,13 +133,24 @@ set.seed(CONFIG$SEED)
 #' @param excluded_org_id Organization ID to exclude (optional)
 #' @return Filtered dataframe
 load_data <- function(filepath, excluded_org_id = NULL) {
-  df <- read_csv(filepath, show_col_types = FALSE)
+  # Only read columns used by the models to reduce memory (~175 cols -> ~15)
+  needed_cols <- c(
+    "level1_prominence", "level1_org_id", "level1_issue_area",
+    "level1_chamber_x", "level1_partyHistory", "level1_ABBREVCAT",
+    "level1_MSHIP_STATUS11", "level1_seniority", "level1_bills_sponsored",
+    "level1_issue_maximal_overlap", "level1_YEARS_EXISTED", "level1_OUTSIDE11",
+    "level1_congress",
+    # Source columns for derived variables (term_status, saliency_category)
+    "level1_year_week", "level1_termBeginYear", "level1_termEndYear",
+    "level1_issue_area_salience"
+  )
+  df <- read_csv(filepath, col_select = all_of(needed_cols), show_col_types = FALSE)
 
   if (!is.null(excluded_org_id)) {
     df <- df %>% filter(level1_org_id != excluded_org_id)
   }
 
-  message(sprintf("Loaded %s rows", format(nrow(df), big.mark = ",")))
+  message(sprintf("Loaded %s rows, %d columns", format(nrow(df), big.mark = ","), ncol(df)))
   return(df)
 }
 
@@ -449,7 +460,8 @@ empty_model <- glmer(
   level1_prominence ~ 1 + (1 | level1_org_id) + (1 | level1_issue_area),
   data = level1,
   family = binomial(link = "logit"),
-  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)),
+  nAGQ = 0
 )
 
 summary(empty_model)
@@ -467,7 +479,8 @@ model_a1 <- glmer(
   level1_prominence ~ saliency_category + (1 | level1_org_id) + (1 | level1_issue_area),
   data = level1,
   family = binomial(link = "logit"),
-  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)),
+  nAGQ = 0
 )
 
 summary(model_a1)
@@ -504,7 +517,8 @@ model_a2 <- glmer(
   data = level1 %>% drop_na(saliency_category, level1_chamber_x, level1_partyHistory,
                              level1_MSHIP_STATUS11, level1_ABBREVCAT),
   family = binomial(link = "logit"),
-  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)),
+  nAGQ = 0
 )
 
 summary(model_a2)
@@ -567,7 +581,7 @@ plot_model(model_a2,
 # Predicted probabilities by saliency
 pred_a <- ggpredict(model_a2, terms = "saliency_category")
 
-plot(pred_a, add.data = FALSE) +
+plot(pred_a, show_data = FALSE) +
   labs(
     title = "Predicted Probability of Prominence by Issue Salience",
     x = "Saliency Category",
@@ -577,7 +591,7 @@ plot(pred_a, add.data = FALSE) +
 ```
 
 ```{r cleanup-model-a, include=FALSE}
-rm(model_a1, model_a2, compare_models_a, or_table_a2, pred_a); gc()
+rm(model_a1, model_a2, or_table_a2, pred_a); gc()
 ```
 
 ## Policy Implications: Model A Findings
@@ -685,7 +699,8 @@ model_b1 <- glmer(
   data = level1 %>% drop_na(level1_issue_maximal_overlap, term_status,
                              level1_bills_sponsored, level1_seniority),
   family = binomial(link = "logit"),
-  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)),
+  nAGQ = 0
 )
 
 summary(model_b1)
@@ -717,7 +732,8 @@ model_b2 <- glmer(
                              level1_seniority, level1_chamber_x, level1_partyHistory,
                              level1_MSHIP_STATUS11, level1_ABBREVCAT),
   family = binomial(link = "logit"),
-  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)),
+  nAGQ = 0
 )
 
 summary(model_b2)
@@ -776,7 +792,7 @@ plot_model(model_b2,
 # Predicted probabilities by seniority
 pred_b_seniority <- ggpredict(model_b2, terms = "level1_seniority [all]")
 
-plot(pred_b_seniority, add.data = FALSE) +
+plot(pred_b_seniority, show_data = FALSE) +
   labs(
     title = "Predicted Probability of Prominence by Member Seniority",
     x = "Years in Congress",
@@ -786,7 +802,7 @@ plot(pred_b_seniority, add.data = FALSE) +
 ```
 
 ```{r cleanup-model-b, include=FALSE}
-rm(model_b1, model_b2, compare_models_b, pred_b_seniority); gc()
+rm(model_b1, model_b2, pred_b_seniority); gc()
 ```
 
 ## Policy Implications: Model B Findings
@@ -919,7 +935,8 @@ model_c1 <- glmer(
     (1 | level1_issue_area),
   data = level1 %>% drop_na(level1_YEARS_EXISTED, level1_OUTSIDE11, unique_issue_areas),
   family = binomial(link = "logit"),
-  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)),
+  nAGQ = 0
 )
 
 summary(model_c1)
@@ -950,7 +967,8 @@ model_c2 <- glmer(
                              level1_chamber_x, level1_partyHistory,
                              level1_MSHIP_STATUS11, level1_ABBREVCAT),
   family = binomial(link = "logit"),
-  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)),
+  nAGQ = 0
 )
 
 summary(model_c2)
@@ -1009,7 +1027,7 @@ plot_model(model_c2,
 # Predicted probabilities by external lobbyist use
 pred_c_lobbyist <- ggpredict(model_c2, terms = "level1_OUTSIDE11")
 
-plot(pred_c_lobbyist, add.data = FALSE) +
+plot(pred_c_lobbyist, show_data = FALSE) +
   labs(
     title = "Predicted Probability of Prominence by External Lobbyist Use",
     x = "Uses External Lobbyists",
@@ -1020,7 +1038,7 @@ plot(pred_c_lobbyist, add.data = FALSE) +
 ```
 
 ```{r cleanup-model-c, include=FALSE}
-rm(model_c1, model_c2, compare_models_c, pred_c_lobbyist, empty_model); gc()
+rm(model_c1, model_c2, pred_c_lobbyist, empty_model); gc()
 ```
 
 ## Policy Implications: Model C Findings
@@ -1185,20 +1203,7 @@ check_model(model_c2)
 ## Export Results
 
 ```{r export-results}
-# Export all model results to CSV
-export_model_table <- function(model, filename) {
-  broom.mixed::tidy(model, conf.int = TRUE, exponentiate = TRUE) %>%
-    filter(effect == "fixed") %>%
-    select(term, estimate, std.error, conf.low, conf.high, statistic, p.value) %>%
-    write_csv(file.path(CONFIG$OUTPUT_DIR, filename))
-}
-
-# Export each full model
-export_model_table(model_a2, "model_a2_results.csv")
-export_model_table(model_b2, "model_b2_results.csv")
-export_model_table(model_c2, "model_c2_results.csv")
-
-# Export model comparison table
+# Export model comparison table (individual models already freed to save memory)
 all_comparisons %>%
   write_csv(file.path(CONFIG$OUTPUT_DIR, "model_comparison.csv"))
 

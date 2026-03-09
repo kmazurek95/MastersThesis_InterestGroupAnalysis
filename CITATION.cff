@@ -7,11 +7,10 @@ authors:
   - family-names: Mazurek
     given-names: Kaleb
     email: kalebmazurek@gmail.com
-    orcid: 'https://orcid.org/0000-0000-0000-0000'  # Replace with actual ORCID if available
 repository-code: 'https://github.com/kmazurek95/MastersThesis_InterestGroupAnalysis'
 url: 'https://github.com/kmazurek95/MastersThesis_InterestGroupAnalysis'
 license: MIT
-version: 2.0.0-alpha
+version: 1.0.0
 date-released: '2024-11-25'
 keywords:
   - interest groups

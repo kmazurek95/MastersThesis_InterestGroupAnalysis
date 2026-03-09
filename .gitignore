@@ -64,15 +64,6 @@ data/external/**
 !data/interim/.gitkeep
 !data/external/.gitkeep
 
-# Processed data (managed separately or via DVC)
-data/processed/**
-!data/processed/multi_level_data/.gitkeep
-!data/processed/multi_level_data/README.md
-
-# DVC
-.dvc/
-*.dvc
-
 # Outputs (generated, not version controlled)
 outputs/**
 !outputs/README.md
@@ -126,12 +117,11 @@ Desktop.ini
 tmp/
 temp/
 
-# Large model files (use DVC or external storage)
+# Large model files
 *.pkl
 *.joblib
 *.h5
 *.hdf5
-!outputs/models/.gitkeep
 
 # Backup files
 *.bak
