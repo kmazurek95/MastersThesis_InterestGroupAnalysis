@@ -140,6 +140,7 @@ CONTRIBUTING.md
 *.html
 !analysis/*.html
 *_files/
+!analysis/*_files/
 *_cache/
 
 # Output directories (keep structure but ignore generated content)
