@@ -167,7 +167,7 @@ recode_abbrevcat <- function(df) {
 
   df <- df %>%
     mutate(
-      level1_ABBREVCAT = recode(level1_ABBREVCAT, !!!name_mapping),
+      level1_ABBREVCAT = name_mapping[level1_ABBREVCAT],
       # Remove Corporations
       level1_ABBREVCAT = if_else(level1_ABBREVCAT == "Corporations", NA_character_, level1_ABBREVCAT)
     ) %>%
@@ -214,7 +214,7 @@ recode_membership_status <- function(df) {
 
   df <- df %>%
     mutate(
-      level1_MSHIP_STATUS11 = recode(level1_MSHIP_STATUS11, !!!name_mapping),
+      level1_MSHIP_STATUS11 = name_mapping[level1_MSHIP_STATUS11],
       level1_MSHIP_STATUS11 = case_when(
         level1_MSHIP_STATUS11 == "Association of Individuals" ~ "Association of Individuals",
         level1_MSHIP_STATUS11 %in% c("Institution", "Association of Institutions",
@@ -268,7 +268,7 @@ compute_issue_area_features <- function(df) {
     summarize(
       most_common_issue_area = {
         tbl <- table(level1_issue_area)
-        names(tbl)[which.max(tbl)]
+        if (length(tbl) == 0) NA_character_ else names(tbl)[which.max(tbl)]
       },
       .groups = "drop"
     )
@@ -443,16 +443,16 @@ If prominence concentrates in low-salience areas, groups may be invisible precis
 
 ## Model A: Empty Model
 
-```{r model-a-empty}
-# Fit empty model (intercept only with random effects)
-model_a_empty <- glmer(
+```{r model-empty}
+# Fit empty model once — identical formula reused for all three model sets
+empty_model <- glmer(
   level1_prominence ~ 1 + (1 | level1_org_id) + (1 | level1_issue_area),
   data = level1,
   family = binomial(link = "logit"),
   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
 )
 
-summary(model_a_empty)
+summary(empty_model)
 ```
 
 ## Model A1: Saliency Category Only
@@ -538,10 +538,10 @@ or_table_a2 %>%
 # Model fit statistics
 compare_models_a <- tibble(
   Model = c("Empty", "A1: Saliency", "A2: Full"),
-  AIC = c(AIC(model_a_empty), AIC(model_a1), AIC(model_a2)),
-  BIC = c(BIC(model_a_empty), BIC(model_a1), BIC(model_a2)),
-  LogLik = c(logLik(model_a_empty)[1], logLik(model_a1)[1], logLik(model_a2)[1]),
-  N = c(nobs(model_a_empty), nobs(model_a1), nobs(model_a2))
+  AIC = c(AIC(empty_model), AIC(model_a1), AIC(model_a2)),
+  BIC = c(BIC(empty_model), BIC(model_a1), BIC(model_a2)),
+  LogLik = c(logLik(empty_model)[1], logLik(model_a1)[1], logLik(model_a2)[1]),
+  N = c(nobs(empty_model), nobs(model_a1), nobs(model_a2))
 )
 
 compare_models_a %>%
@@ -574,6 +574,10 @@ plot(pred_a, add.data = FALSE) +
     y = "Predicted Probability of Prominence"
   ) +
   theme_minimal(base_size = 12)
+```
+
+```{r cleanup-model-a, include=FALSE}
+rm(model_a1, model_a2, compare_models_a, or_table_a2, pred_a); gc()
 ```
 
 ## Policy Implications: Model A Findings
@@ -659,14 +663,8 @@ If prominence concentrates among electorally secure, senior members in specific 
 ## Model B: Empty Model
 
 ```{r model-b-empty}
-model_b_empty <- glmer(
-  level1_prominence ~ 1 + (1 | level1_org_id) + (1 | level1_issue_area),
-  data = level1,
-  family = binomial(link = "logit"),
-  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
-)
-
-summary(model_b_empty)
+# Reuse empty model from Model A (identical formula and data)
+summary(empty_model)
 ```
 
 ## Model B1: Politician Characteristics
@@ -750,10 +748,10 @@ broom.mixed::tidy(model_b2, conf.int = TRUE, exponentiate = TRUE) %>%
 ```{r model-b-comparison}
 compare_models_b <- tibble(
   Model = c("Empty", "B1: Politician Chars", "B2: Full"),
-  AIC = c(AIC(model_b_empty), AIC(model_b1), AIC(model_b2)),
-  BIC = c(BIC(model_b_empty), BIC(model_b1), BIC(model_b2)),
-  LogLik = c(logLik(model_b_empty)[1], logLik(model_b1)[1], logLik(model_b2)[1]),
-  N = c(nobs(model_b_empty), nobs(model_b1), nobs(model_b2))
+  AIC = c(AIC(empty_model), AIC(model_b1), AIC(model_b2)),
+  BIC = c(BIC(empty_model), BIC(model_b1), BIC(model_b2)),
+  LogLik = c(logLik(empty_model)[1], logLik(model_b1)[1], logLik(model_b2)[1]),
+  N = c(nobs(empty_model), nobs(model_b1), nobs(model_b2))
 )
 
 compare_models_b %>%
@@ -785,6 +783,10 @@ plot(pred_b_seniority, add.data = FALSE) +
     y = "Predicted Probability of Prominence"
   ) +
   theme_minimal(base_size = 12)
+```
+
+```{r cleanup-model-b, include=FALSE}
+rm(model_b1, model_b2, compare_models_b, pred_b_seniority); gc()
 ```
 
 ## Policy Implications: Model B Findings
@@ -901,14 +903,8 @@ Conversely, if resources have weak effects, it suggests prominence operates thro
 ## Model C: Empty Model
 
 ```{r model-c-empty}
-model_c_empty <- glmer(
-  level1_prominence ~ 1 + (1 | level1_org_id) + (1 | level1_issue_area),
-  data = level1,
-  family = binomial(link = "logit"),
-  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
-)
-
-summary(model_c_empty)
+# Reuse empty model from Model A (identical formula and data)
+summary(empty_model)
 ```
 
 ## Model C1: Organizational Characteristics
@@ -985,10 +981,10 @@ broom.mixed::tidy(model_c2, conf.int = TRUE, exponentiate = TRUE) %>%
 ```{r model-c-comparison}
 compare_models_c <- tibble(
   Model = c("Empty", "C1: Org Characteristics", "C2: Full"),
-  AIC = c(AIC(model_c_empty), AIC(model_c1), AIC(model_c2)),
-  BIC = c(BIC(model_c_empty), BIC(model_c1), BIC(model_c2)),
-  LogLik = c(logLik(model_c_empty)[1], logLik(model_c1)[1], logLik(model_c2)[1]),
-  N = c(nobs(model_c_empty), nobs(model_c1), nobs(model_c2))
+  AIC = c(AIC(empty_model), AIC(model_c1), AIC(model_c2)),
+  BIC = c(BIC(empty_model), BIC(model_c1), BIC(model_c2)),
+  LogLik = c(logLik(empty_model)[1], logLik(model_c1)[1], logLik(model_c2)[1]),
+  N = c(nobs(empty_model), nobs(model_c1), nobs(model_c2))
 )
 
 compare_models_c %>%
@@ -1021,6 +1017,10 @@ plot(pred_c_lobbyist, add.data = FALSE) +
   ) +
   scale_x_continuous(breaks = c(0, 1), labels = c("No", "Yes")) +
   theme_minimal(base_size = 12)
+```
+
+```{r cleanup-model-c, include=FALSE}
+rm(model_c1, model_c2, compare_models_c, pred_c_lobbyist, empty_model); gc()
 ```
 
 ## Policy Implications: Model C Findings
