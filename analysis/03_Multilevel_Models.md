@@ -57,20 +57,20 @@ Three sets of generalized linear mixed-effects models (GLMMs) test what
 predicts whether an interest group mention is prominent (cited as
 authoritative) versus routine.
 
-**Models:**
+Models:
 
-- **Model A**: Issue salience (does policy salience predict prominence?)
-- **Model B**: Politician characteristics (seniority, party, chamber,
+- Model A: Issue salience (does policy salience predict prominence?)
+- Model B: Politician characteristics (seniority, party, chamber,
   legislative activity)
-- **Model C**: Organizational resources (age, lobbying expenditure,
+- Model C: Organizational resources (age, lobbying expenditure,
   policy scope)
 
 Random effects: Organization ID and Policy Area (crossed).
 
 Data: 19,165 mentions of 500+ advocacy organizations in the 114th-115th
-Congress. Prominence classified by SVM at ~81% accuracy.
+Congress. Prominence classified by Multinomial Naive Bayes.
 
-**Key findings:**
+Key findings:
 
 1.  Medium-salience policy areas predict prominence better than
     high-salience areas
@@ -3915,14 +3915,14 @@ p1 + p2 + plot_layout(guides = "collect")
 The three model sets converge on a finding that prominence operates
 through different channels than traditional lobbying access:
 
-- **Salience paradox**: Groups gain prominence in medium-salience areas,
+- Salience paradox: Groups gain prominence in medium-salience areas,
   not high-salience ones. Legislators may avoid citing external
   validators on polarized issues where group names become partisan
   signals.
-- **Seniority reversal**: Junior members cite groups more prominently,
+- Seniority reversal: Junior members cite groups more prominently,
   possibly because they need external validators to establish
   credibility.
-- **Moderate resource effects**: External lobbyists increase prominence
+- Moderate resource effects: External lobbyists increase prominence
   odds, but organizational age has minimal effect. Newer groups can
   break through.
 
@@ -3930,7 +3930,7 @@ These patterns distinguish prominence from lobbying access and policy
 influence as a separate dimension of interest group success (extending
 Grossmann, 2012; Halpin & Fraussen, 2017).
 
-**Hypothesis mapping**: Model A partially supports H1: medium salience
+Hypothesis mapping: Model A partially supports H1: medium salience
 predicts prominence, but high salience reduces it rather than increasing
 it. Model B partially supports H2: seniority is significant but in the
 opposite direction from what was predicted. Model C rejects the null
@@ -3944,7 +3944,7 @@ document.
 - Congressional Record captures floor speeches only, not committee
   hearings or private communication
 - Time window (2015-2019) predates recent polarization shifts
-- Classifier accuracy (~81%) introduces measurement noise
+- Classifier imperfection (Naive Bayes, F1 ≈ 0.73) introduces measurement noise
 - Cross-sectional design limits causal claims
 
 ------------------------------------------------------------------------
@@ -4046,4 +4046,4 @@ University Press.
 
 ------------------------------------------------------------------------
 
-**Document compiled**: March 09, 2026 at 02:56 PM
+Document compiled: March 09, 2026 at 02:56 PM

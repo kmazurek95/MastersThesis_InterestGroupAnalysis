@@ -1,4 +1,4 @@
-# README: Modeling Prominence in Interest Group Mentions
+# README: Modeling prominence in interest group mentions
 
 ## Overview
 
@@ -7,11 +7,11 @@ This repository contains scripts and analyses for modeling the prominence of int
 ## Purpose
 
 The project investigates the interplay of three primary factors:
-- **Interest Groups**: Attributes such as age, membership status, and lobbying expenditure.
-- **Issue Areas**: Contextualized through policy domains and public salience.
-- **Speakers (Politicians)**: Attributes such as policy-domain overlap, seniority, and election-year status.
+- Interest groups: Attributes such as age, membership status, and lobbying expenditure.
+- Issue areas: Contextualized through policy domains and public salience.
+- Speakers (politicians): Attributes such as policy-domain overlap, seniority, and election-year status.
 
-## Repository Structure
+## Repository structure
 
 ```bash
 .
@@ -28,116 +28,116 @@ The project investigates the interplay of three primary factors:
 
 ---
 
-## Modeling Approach
+## Modeling approach
 
-The analysis employs **Generalized Linear Mixed-Effects Models (GLMMs)**, allowing for:
+The analysis employs Generalized Linear Mixed-Effects Models (GLMMs), allowing for:
 - Binary outcomes (prominent vs. non-prominent mentions).
 - Separation of fixed and random effects.
 - Accounting for hierarchical structures in the data (mentions nested within interest groups and issue areas).
 
-### Key Models:
-#### 1. **Policy Salience Models**:
+### Key models:
+#### 1. Policy salience models:
 - Explores how public salience of policy areas impacts the likelihood of prominent mentions.
 - Incorporates salience categories (low, medium, high) derived from Google Trends data.
 
-#### 2. **Group-Politician Linkage Models**:
+#### 2. Group-politician linkage models:
 - Evaluates how politician attributes (e.g., bill sponsorship, seniority) influence prominence.
 - Includes random effects for policy areas and interest groups.
 
-#### 3. **Group Characteristics Models**:
+#### 3. Group characteristics models:
 - Investigates how group attributes (e.g., lobbying expenditure, age, policy scope) predict prominence.
 - Highlights the significance of broad policy engagement.
 
 ---
 
-## Description of Python Scripts
+## Description of Python scripts
 
 ### `DataProcessingAndRegression.py`
 
-**Purpose:**  
-Handles comprehensive data preprocessing and regression analysis, including cleaning, visualization, and modeling.
+Purpose:  
+Handles thorough data preprocessing and regression analysis, including cleaning, visualization, and modeling.
 
-**Key Features:**
-- **Data Cleaning:** Replaces missing values and filters invalid rows.
-- **Feature Engineering:**  
+Key features:
+- Data cleaning: Replaces missing values and filters invalid rows.
+- Feature engineering:  
   - Processes date columns to compute derived variables like `YEARS_EXISTED`.
   - Normalizes salience metrics and creates ordinal variables for analysis.
-- **Visualization:**  
+- Visualization:  
   - Generates histograms and boxplots for raw and transformed data.
   - Provides insights into variable distributions before and after transformations.
-- **Probit Regression:** Fits a Probit regression model to predict binary outcomes like prominence.
-- **Data Aggregation:** Groups data by organizational ID and summarizes metrics like lobbying expenditure, years existed, and prominence counts.
-- **Output:** Saves cleaned, transformed, and aggregated datasets to CSV files.
+- Probit regression: Fits a Probit regression model to predict binary outcomes like prominence.
+- Data aggregation: Groups data by organizational ID and summarizes metrics like lobbying expenditure, years existed, and prominence counts.
+- Output: Saves cleaned, transformed, and aggregated datasets to CSV files.
 
-**Usage:**  
+Usage:  
 Run the script to preprocess datasets, visualize key variables, and perform regression modeling. Outputs include clean datasets, statistical summaries, and visualizations.
 
 ---
 
 ### `InterestGroupAnalysisPipeline.py`
 
-**Purpose:**  
+Purpose:  
 Focuses on advanced data integration, validation, and deduplication tasks for interest group analysis.
 
-**Key Features:**
-- **Duplicate Detection:**  
+Key features:
+- Duplicate detection:  
   - Uses MinHash and LSH Forest algorithms to identify and filter potential duplicate records.
-  - Facilitates efficient identification of overlaps in variations and organization IDs.
-- **Dataset Merging:** Combines multiple datasets based on a common key (e.g., `granuleId`) while applying filtering rules.
-- **Data Validation:**  
+  - Enables efficient identification of overlaps in variations and organization IDs.
+- Dataset merging: Combines multiple datasets based on a common key (e.g., `granuleId`) while applying filtering rules.
+- Data validation:  
   - Checks for duplicate or missing records in critical columns.
   - Ensures dataset integrity for downstream analyses.
-- **Interest Group Filtering:** Removes specific interest group categories based on custom criteria.
-- **Feature Engineering:** Adds a `congress` column by mapping dates to congressional sessions.
-- **Output:** Saves validated and merged datasets for further analysis.
+- Interest group filtering: Removes specific interest group categories based on custom criteria.
+- Feature engineering: Adds a `congress` column by mapping dates to congressional sessions.
+- Output: Saves validated and merged datasets for further analysis.
 
-**Usage:**  
+Usage:  
 Run the script to clean, validate, and merge datasets, and prepare integrated data pipelines. Outputs include filtered datasets and enriched features like congressional mappings.
 
 ---
 
-## Data & Variable Operationalization
+## Data & variable operationalization
 
 ### Variables
-1. **Prominence**: Binary indicator (prominent vs. non-prominent mentions) derived using a classifier.
-2. **Issue Area**: Categorized into 21 domains using the Comparative Agendas Project schema and committee/bill mapping.
-3. **Public Salience**: Based on Google Trends data, categorized into low, medium, and high salience.
-4. **Group Attributes**: Includes age, membership status, lobbying expenditure, and policy scope.
-5. **Speaker Attributes**: Includes seniority, election-year status, and policy-domain overlap.
+1. Prominence: Binary indicator (prominent vs. non-prominent mentions) derived using a classifier.
+2. Issue area: Categorized into 21 domains using the Comparative Agendas Project schema and committee/bill mapping.
+3. Public salience: Based on Google Trends data, categorized into low, medium, and high salience.
+4. Group attributes: Includes age, membership status, lobbying expenditure, and policy scope.
+5. Speaker attributes: Includes seniority, election-year status, and policy-domain overlap.
 
-### Key Data Sources:
-- **Congressional Records**: For mentions and associated metadata.
-- **Google Trends**: To derive issue salience measures.
-- **Washington Representative Studies**: For group-level attributes.
-- **ProPublica API**: For politician characteristics.
+### Key data sources:
+- Congressional Records: For mentions and associated metadata.
+- Google Trends: To derive issue salience measures.
+- Washington Representative Studies: For group-level attributes.
+- ProPublica API: For politician characteristics.
 
 ---
 
-## Results Summary
+## Results summary
 
-### Policy Salience:
+### Policy salience:
 - Medium salience policy areas significantly increase the likelihood of prominent mentions.
 - High salience areas do not show significant effects.
 
-### Group-Politician Linkage:
+### Group-politician linkage:
 - Senior politicians are less likely to afford prominence to interest groups, contrary to expectations.
 - Bill sponsorship and policy-area overlap show limited significance.
 
-### Group Characteristics:
+### Group characteristics:
 - Engagement with a broad range of policy areas enhances prominence significantly.
 - Lobbying expenditure becomes significant when control variables are included.
 - Organization age shows limited influence on prominence.
 
 ---
 
-## How to Use the Repository
+## How to use the repository
 
-### Clone the Repository:
+### Clone the repository:
 ```bash
 git clone https://github.com/username/repo-name.git
 ```
 
-### Install Dependencies:
+### Install dependencies:
 
 For Python scripts:
 ```bash
@@ -149,12 +149,12 @@ For R scripts:
 install.packages(c("lme4", "dplyr", "ggplot2", "broom.mixed", "kableExtra", "forcats"))
 ```
 
-### Run Scripts:
+### Run scripts:
 
-1. **Python Scripts**:
+1. Python scripts:
    - `DataProcessingAndRegression.py`: Handles preprocessing, visualization, and regression modeling.
    - `InterestGroupAnalysisPipeline.py`: Integrates, validates, and deduplicates datasets.
-2. **R Scripts**:
+2. R scripts:
    - `model_policy_salience.R`
    - `model_group_politician.R`
    - `model_group_characteristics.R`
@@ -169,9 +169,9 @@ Results are saved in the `results/` directory, including:
 ---
 
 ## Limitations
-1. **Data Completeness**: Certain observations lack policy context and were excluded from the analysis.
-2. **Google Trends Data**: Represents public attention but may not perfectly align with salience.
-3. **Temporal Constraints**: Some group-level attributes (e.g., lobbying expenditure) are treated as constant due to data availability.
+1. Data completeness: Certain observations lack policy context and were excluded from the analysis.
+2. Google Trends data: Represents public attention but may not perfectly align with salience.
+3. Temporal constraints: Some group-level attributes (e.g., lobbying expenditure) are treated as constant due to data availability.
 
 ---
 

@@ -1,4 +1,4 @@
-# Analysis Dataset
+# Analysis dataset
 
 This folder contains the processed dataset used in the thesis analysis. Files are tracked with Git LFS due to size.
 
@@ -18,7 +18,7 @@ Each row is one mention of an interest group in a congressional floor speech par
 
 ## Key variables
 
-- `level1_prominence`: Binary (1 = prominent citation, 0 = routine mention). Classified by SVM at ~81% accuracy.
+- `level1_prominence`: Binary (1 = prominent citation, 0 = routine mention). Classified by Multinomial Naive Bayes (F1 ≈ 0.73).
 - `level1_org_id`: Organization identifier from the Washington Representatives Study.
 - `saliency_measure` / `saliency_category`: Policy salience from Google Trends data.
 - `level1_chamber_x`: House or Senate.
